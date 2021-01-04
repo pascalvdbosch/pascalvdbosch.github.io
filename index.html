@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" crossorigin="anonymous">
+    <title>Hello, world!</title>
+  </head>
+  <body>
+    <div class="container">
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <a class="navbar-brand" href="#">HHS</a>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="https://blackboard.hhs.nl/webapps/blackboard/content/listContentEditable.jsp?content_id=_3128758_1&course_id=_82317_1">Blackboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://quizjes.herokuapp.com">Quizjes</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+                  Lessen
+                </a>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="les1.html">Les 1</a>
+                  <a class="dropdown-item" href="les2.html">Les 2</a>
+                  <a class="dropdown-item" href="les3.html">Les 3</a>
+                  <a class="dropdown-item" href="les4.html">Les 4</a>
+                  <a class="dropdown-item" href="les5.html">Les 5</a>
+                  <a class="dropdown-item" href="les6.html">Les 6</a>
+                  <a class="dropdown-item" href="les7.html">Les 7</a>
+                  <a class="dropdown-item" href="les8.html">Les 8</a>
+                  <a class="dropdown-item" href="les9.html">Les 9</a>
+                  <a class="dropdown-item" href="les10.html">Les 10</a>
+                  <a class="dropdown-item" href="les11.html">Les 11</a>
+                  <a class="dropdown-item" href="les12.html">Les 12</a>
+                </div>
+              </li>
+            </ul>
+          </nav>
+        <div class="jumbotron">
+          <h1>WPFW</h1>
+          <p>De content op deze website is exact gelijk aan de content op Blackboard. </p>
+        </div>
+        <div id="rest">
+        </div>
+      </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" integrity="sha512-L03kznCrNOfVxOUovR6ESfCz9Gfny7gihUX/huVbQB9zjODtYpxaVtIaAkpetoiyV2eqWbvxMH9fiSv5enX7bw==" crossorigin="anonymous"></script>
+    <script>
+      let converter = new showdown.Converter();
+      fetch('all.md').
+        then((response) => 
+          response.text().then((text) => 
+            document.getElementById("rest").innerHTML = converter.makeHtml(text)));
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <title>Testen</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="Les 7">
+</head>
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="ASP.NET Core MVC & EF Core"></section>
+            <section h3="Terugblik">
+                <ul>
+                    <li>ORM</li>
+                    <li frag><i-icode>Add-Migration ...</i-icode> en <i-icode>Update-Database</i-icode></li>
+                    <li frag>Data-annotaties: configureren data model en mapping</li>
+                    <li frag>
+                        DBContext
+                        <ul>
+                            <li frag><i-icode>DbSet</i-icode>: wat moet er opgeslagen worden?</li>
+                            <li frag><i-icode>OnConfiguring</i-icode>: connectiestring, (lazy) loading</li>
+                            <li frag><i-icode>OnModelCreating</i-icode>: configureren data model en mapping met Fluent API</li>
+                        </ul>
+                    </li>
+                    <li frag>Versie 5 ondersteunt many-to-many (<a href="https://devblogs.microsoft.com/dotnet/announcing-net-5-0/">release date</a>)</li>
+                    <li frag>De static class <i-icode>DBInitializer</i-icode> (is geen singleton)</li>
+                </ul>
+                <i-notes>
+                    <ul>
+                        <li>ORM is geen pattern</li>
+                        <li>MVC is een pattern</li>
+                        <li>lazy load is een pattern</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Verder-terug-blik">
+                <ul>
+                    <li>We kunnen een webapplicatie maken met <strong>ASP.NET Core MVC</strong> [10b]</li>
+                    <li frag>We kunnen een database aanmaken code-first en gebruiken met de ORM <strong>EF Core</strong> [11b]<br/>(en bevragen met <strong>LINQ</strong> [11a])</li>
+                </ul>
+                <p frag>Hoe kunnen we <strong>EF Core</strong> gebruiken in <strong>ASP.NET Core MVC</strong>?</p>
+                <ul>
+                    <li frag>Wanneer wordt de <i-icode>DBContext</i-icode> aangemaakt?</li>
+                    <li frag>Wanneer wordt de in een HTTP request meegegeven data gechecked voordat het de database in gaat?</li>
+                </ul>
+            </section>
+            <section h3="Wanneer wordt de DBContext aangemaakt?">
+                <ul>
+                    <li>Richtlijn: maak een <i-icode>DBContext</i-icode> aan per <a href="https://martinfowler.com/eaaCatalog/unitOfWork.html">unit of work</a></li>
+                    <li frag>Hoe vaak <i-icode>SaveChanges</i-icode>, hoe vaak <i-icode>DBContext.Dispose</i-icode>?</li>
+                    <li frag>
+                        <i-icode>SaveChanges</i-icode>: 
+                        <ul>
+                            <li frag>Niet vaak genoeg: memory overflow</li>
+                            <li frag>Te vaak: <a href="https://stackoverflow.com/questions/5940225/fastest-way-of-inserting-in-entity-framework">erg langzaam</a></li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Wat doet <i-icode>SaveChanges</i-icode>? 
+                        <ul>
+                            <li frag>
+                                <i-icode>SaveChanges</i-icode> maakt een transactie aan en voert het uit. 
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        De constructor en de <i-icode>Dispose</i-icode> van de <i-icode>DBContext</i-icode>: maak connectie en ruim op. 
+                        <ul>
+                            <li frag>
+                                <i-icode>DBContext</i-icode> is niet thread-safe. 
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Oja... transacties">
+                EF Core implementeert <strong>optimistic concurrency control</strong>. Zie de <a href="https://docs.microsoft.com/en-us/ef/core/saving/concurrency">MSDN</a>
+                <img src="img/Concurrency.png" alt="" style="width:60%">
+                <i-notes>
+                    Transacties kan ook handmatig
+                </i-notes>
+                <i-notes>
+                    Vraag: wanneer is optimistic concurrency control beter?
+                </i-notes>
+            </section>
+            <section h3="Wat kan er mis gaan?">
+                <a href="les7demo1.cs">Demo</a>
+            </section>
+            <section h3="Waar maken we de DBContext aan?">
+                <p>In ASP.NET Core gebeurt dat niet in de controller.</p>
+                <ul>
+                    <li>Via <strong>dependency injection</strong></li>
+                    <li>Dependency injection is een design pattern</li>
+                </ul>
+                <i-notes>
+                    Verschillende 'vormen': door constructor, property, method, etc.
+                </i-notes>
+            </section>
+            <section h3="Intermezzo: herinner semester 2 en een nieuw patroontje">
+                <sided>
+                    <side>
+                        <img src="img/DIP.png" alt="" style="width:100%">
+                        <ul>
+                            <li frag=1>Dependency Inversion is een <em>principe</em></li>
+                            <li frag=2>Dependency Injection is een <em>design pattern</em> om Dependency Inversion te bereiken. </li>
+                        </ul>
+                    </side>
+                    <side>
+                        <div class="r-stack">
+                            <i-code cs  frag=3>
+                                public class AudiRS2
+                                {
+                                    public void GeefGas() { /* ... */ } 
+                                }
+                                public class Automobilist
+                                {
+                                    private AudiRS2 auto;
+                                    public Automobilist()
+                                    {
+                                        auto = new AudiRS2();
+                                    }
+                                    public void Rijden()
+                                    {
+                                        // ...
+                                        auto.GeefGas();
+                                        // ...
+                                    }
+                                }
+                            </i-code>
+                            <i-code cs frag=4>
+                                public interface IAuto { void GeefGas(); }
+                                public class AudiRS2 : IAuto
+                                {
+                                    public void GeefGas() { /* ... */ } 
+                                }
+                                public class Automobilist
+                                {
+                                    private IAuto auto;
+                                    public Automobilist(IAuto auto)
+                                    {
+                                        this.auto = auto;
+                                    }
+                                    public void Rijden()
+                                    {
+                                        // ...
+                                        auto.GeefGas();
+                                        // ...
+                                    }
+                                }
+                            </i-code>
+                            <i-code cs frag=5>
+                                public interface IService { void DoIets(); }
+                                public class ConcreteService : IService
+                                {
+                                    public void DoIets() { /* ... */ } 
+                                }
+                                public class Client
+                                {
+                                    private IService service;
+                                    public Client(IService service)
+                                    {
+                                        this.service = service;
+                                    }
+                                    public void EenMethode()
+                                    {
+                                        // ...
+                                        service.DoIets();
+                                        // ...
+                                    }
+                                }
+                            </i-code>
+                        </div>
+                    </side>
+                </sided>
+                <i-notes>
+                    <ul>
+                        <li>DIP kan ook met factory</li>
+                        <li>Kan ook object meegeven aan methode of property setten.</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Waar maken we de DBContext aan?">
+                <p>In ASP.NET Core gebeurt dat niet in de controller. Lees <a href="https://docs.microsoft.com/en-us/ef/core/dbcontext-configuration/">dit</a>. </p>
+                <ul>
+                    <li>Via <strong>dependency injection</strong></li>
+                    <li frag>Dependency injection is een design pattern</li>
+                    <li frag>In Startup.cs: 
+                        <i-code cs size=small>
+                            public void ConfigureServices(IServiceCollection services)
+                            {
+                                services.AddControllers();
+                                services.AddDbContext&lt;MijnContext&gt;(
+                                    options => options.UseSqlServer("..."));
+                            }
+                        </i-code>
+                        En: 
+                        <i-code cs size=small>
+                            public class MijnContext : DbContext
+                            {
+                                public MijnContext(DbContextOptions&lt;MijnContext&gt; p)
+                                    : base(o)
+                                { }
+                            }
+                        </i-code>
+                        En dan gebruiken we het als: 
+                        <i-code cs size=small>
+                            public class MijnController
+                            {
+                                private readonly MijnContext _context;
+                                public MijnController(MijnContext context)
+                                {
+                                    _context = context;
+                                }
+                            }
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Deze dependency injection gaat op een ASP.NET Core-specifieke manier. 
+                        <!-- Install-Package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
+                        services.AddDatabaseDeveloperPageExceptionFilter(); in ConfigureServices -->
+                    </li>
+                </ul>
+            </section>
+            <section h3="Dependency Injection in ASP.NET Core">
+                <sided>
+                    <side>
+                        <i-code cs size=small>
+                            public interface IDateTime
+                            {
+                                DateTime Now
+                                {
+                                    get;
+                                }
+                            }
+                            public class SystemDateTime : IDateTime
+                            {
+                                public DateTime Now
+                                {
+                                    get
+                                    {
+                                        return DateTime.Now;
+                                    }
+                                }
+                            }
+                        </i-code>
+                    </side>
+                    <side>
+                        <i-code cs size=small frag>
+                            public class Startup
+                            {
+                                // ...
+                                public void ConfigureServices(IServiceCollection services)
+                                {
+                                    services.AddSingleton&lt;IDateTime, SystemDateTime&gt;();
+                                    services.AddControllersWithViews();
+                                }
+                            }
+                            public class HomeController : Controller
+                            {
+                                private readonly IDateTime _dateTime;
+
+                                public HomeController(IDateTime dateTime)
+                                {
+                                    _dateTime = dateTime; 
+                                }
+                                public string Index()
+                                {
+                                    return "De tijd is: " + _dateTime.Now.ToString();
+                                }
+                            }
+                        </i-code>
+                        <p frag>Zie <a href="https://auth0.com/blog/dependency-injection-in-dotnet-core/">deze blog</a> voor meer details. </p>
+                        <p frag>Opties injecteren gaat met <i-icode>.Configure</i-icode>, zie de <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/dependency-injection">MSDN</a>. </p>
+                    </side>
+                </sided>
+            </section>
+            <section h3="Model validation">
+                <sided>
+                    <side>
+                        <i-code cs size=small>
+                            public class Movie
+                            {
+                                public int Id { get; set; }
+        
+                                [StringLength(60, MinimumLength = 3)]
+                                [Required]
+                                public string Title { get; set; }
+        
+                                [Display(Name = &quot;Release Date&quot;)]
+                                [DataType(DataType.Date)]
+                                public DateTime ReleaseDate { get; set; }
+        
+                                [Range(1, 100)]
+                                [DataType(DataType.Currency)]
+                                [Column(TypeName = &quot;decimal(18, 2)&quot;)]
+                                public decimal Price { get; set; }
+        
+                                [RegularExpression(@&quot;^[A-Z]+[a-zA-Z]*$&quot;)]
+                                [Required]
+                                [StringLength(30)]
+                                public string Genre { get; set; }
+        
+                                [RegularExpression(@&quot;^[A-Z]+[a-zA-Z0-9&quot;&quot;&#039;\s-]*$&quot;)]
+                                [StringLength(5)]
+                                [Required]
+                                public string Rating { get; set; }
+                            }
+                        </i-code>
+                    </side>
+                    <side>
+                        <i-code cs size=small>
+                            // GET: Movies/Create
+                            public IActionResult Create()
+                            {
+                                return View();
+                            }
+
+                            // POST: Movies/Create
+                            [HttpPost]
+                            public void IActionResult Create(Movie movie)
+                            {
+                                if (ModelState.IsValid)
+                                {
+                                    _context.Add(movie);
+                                    _context.SaveChanges();
+                                    return RedirectToAction(&quot;Index&quot;);
+                                }
+                                return View(movie);
+                            }
+                        </i-code>
+                    </side>
+                </sided>
+            </section>
+           <section h2="Herhaling testen"></section>
+           <section h3="Unit testen">
+            <ul>
+                <li>Een Unit is klein</li>
+                <li frag>Meestal kiezen we als unit voor 1 methode van een specifieke Class</li>
+                <li frag>We willen graag een Automatische test voorbereiden</li>
+                <li frag>Dat is nuttig voor de bewaking van de kwaliteit van je code</li>
+                <li frag>Na iedere (kleine) wijziging kun je de code automatisch testen</li>
+                <li frag>Het voorkomt bugs in bestaande functionaliteit (omdat unittests moeten blijven slagen)</li>
+                <li frag>Voor nieuwe functionaliteit moeten er natuurlijk wel nieuwe unittests worden aangemaakt</li>
+            </ul>
+           </section>
+           <section h3="Soorten testen">
+               <sided>
+                   <side>
+                    <p>Gecategoriseerd op 'grootte': </p>
+                    <ul>
+                        <li frag>Unittest</li>
+                        <li frag>Integratietest</li>
+                        <li frag>Systeemtest</li>
+                    </ul>
+                   </side>
+                   <side>
+                    <p frag>Gecategoriseerd op wat er getest wordt: </p>
+                    <ul>
+                        <li frag>Compatibility testen. Bijv.: verschillende browsers</li>
+                        <li frag>Performance testen / Load testen. Bijv.: voeg 10000 studenten toe en gebruik een timer. </li>
+                        <li frag>Usability/accessibility testen (gastcollege Stichting Accessibility!)</li>
+                        <li frag>Penetration testen (gastcollege Centric!)</li>
+                        <li frag>Code quality testen. Bijv. tool om statisch code te checken: Microsoft.CodeAnalysis.FxCopAnalyzers NuGet package</li>
+                    </ul>
+                   </side>
+               </sided>
+           </section>
+           <section h3="Test-data in de database">
+               <p>[zie de <a href="https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/intro?view=aspnetcore-5.0#initialize-db-with-test-data">MSDN</a> voor meer uitleg]</p>
+               <sided>
+                   <side>
+                       <p frag>Herinner onze <i-icode>DbInitializer</i-icode>:</p>
+                       <i-code cs size=small frag> 
+                           public static class DbInitializer
+                           {
+                              public static void Initialize(MijnContext context)
+                              {
+                                 if (context.Studenten.Any()) return;
+                                 context.Studenten.Add(new Student { Naam = "Bob" });
+                                 context.Studenten.Add(new Student { Naam = "Alice" });
+                                 context.SaveChanges();
+                              }
+                           }
+                        </i-code> 
+                   </side>
+                   <side>
+                       <i-code cs frag size=small>
+                           public static void Main(string[] args)
+                           {
+                               var host = CreateHostBuilder(args).Build();
+                               using (var scope = host.Services.CreateScope())
+                               {
+                                   DbInitializer.Initialize(scope.ServiceProvider
+                                       .GetRequiredService&lt;MijnContext&gt;());
+                               }
+                               host.Run();
+                           }
+                       </i-code>
+                   </side>
+               </sided>
+               
+               <p frag>In de configuratie van het model, OnModelCreating, kan ook worden geseed: </p>
+               <i-code cs frag size=small>
+                   modelBuilder.Entity&lt;Blog&gt;().HasData(new Blog {BlogId = 1, Url = "http://sample.com"});
+               </i-code>
+               <p frag>Dit is langzaam en Id's moeten worden geset. </p>
+           </section>
+            <section h2="Testen zonder database"></section>
+            <section h3="Aan de slag met xUnit om een Controller te testen">
+                <ul>
+                    <li>Wat kun je eigenlijk testen in een Controller?</li>
+                    <li frag>Je kunt alle Action-methods testen</li>
+                    <li frag>Voor elke Action-Method schrijf je minimaal 1 unittest</li>
+                    <li frag>Wat heb je nodig om de unittests voor te bereiden?</li>
+                    <li frag>Je maakt een nieuw ASP.NET Core-project aan (de default is goed genoeg)</li>
+                    <li frag>Daarna voeg je een testproject o.b.v. xUnit toe (zoals in 10a)</li>
+                    <li frag>Vergeet niet om in je testcode een Reference op te nemen naar de webapplicatie (we testen namelijk de webapplicatie)</li>
+                </ul>
+            </section>
+            <section h3="Een echte Action-method testen">
+                <p>Hier kunnen we de <i-icode>Privacy</i-icode> Action-method voor gebruiken (aangemaakt in de Home-Controller)</p>
+                <i-code cs>
+                    [Fact]
+                    public void PrivacyInHomeController()
+                    {
+                        HomeController c = new HomeController();
+                        var result = c.Privacy();
+
+                        //result moet een view zijn
+                        var viewResult = Assert.IsType&lt;ViewResult&gt;(result);
+
+                        //checken op correcte ViewData
+                        var message = viewResult.ViewData["Message"];
+                        Assert.Equal("Uw privacy wordt gerespecteerd. ", message);
+                    }
+                </i-code>
+            </section>
+            <section h3="Noodzakelijke usings en references">
+                <ul>
+                    <li>
+                        Om de Controller te kunnen gebruiken heb je een using-regel nodig in je unittest bestand
+                        <i-code cs>
+                            using Project.Controllers;
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Nu krijg je echter een foutmelding van de compiler voor de regel
+                        <i-code cs>
+                            var result = c.Privacy();
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Dit komt omdat de <i-icode>Privacy</i-icode> methode een <i-icode>IActionResult</i-icode> teruggeeft die hij niet kent
+                        <ul>
+                            <li frag>Voeg daarom eerst package <i-icode>Microsoft.AspNetCore.MVC</i-icode> toe</li>
+                            <li frag>
+                                Gebruik dezelfde versie als in je echte project en neem using op in je testfile:
+                                <i-code cs>using Microsoft.AspNetCore.Mvc;</i-code>
+                            </li>
+                            <li frag>NB: Soms is het nodig om je project opnieuw te starten (als foutmeldingen niet verdwijnen)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Dependency problemen">
+                <ul>
+                    <li>Soms zijn er problemen met het toevoegen van NuGet Package Microsoft.AspNetCore.Mvc</li>
+                    <li>In Project.csproj file worden alle referentie opgeslagen:
+                        <ul><li>Openen kan met rechtermuis op het project > "Edit Project.csproj"</li>
+                        <li>Visual Studio opent dan een XML file</li></ul>
+                    </li>
+                    <li>Deze file kun je ook rechtstreeks bewerken om de versie van een NuGet Package te wijzigen
+                        <ul><li>Vergeet niet om de file te bewaren en</li>
+                        <li>Om de Solution met Rebuild opnieuw te compileren</li></ul>
+                    </li>
+                    <li>
+                        In de volgende 2 sheets staan correcte voorbeelden van Project.csproj-files
+                            <ul>
+                                <li>soms gebeurt het dat je een Warning blijft zien maar de unittesten met xUnit werken nu wel</li>
+                            </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="csproj file voor het webproject (correct voorbeeld)">
+                <i-code xml>
+                    &lt;Project Sdk=&quot;Microsoft.NET.Sdk.Web&quot;&gt;
+
+                        &lt;PropertyGroup&gt;
+                          &lt;TargetFramework&gt;netcoreapp3.1&lt;/TargetFramework&gt;
+                        &lt;/PropertyGroup&gt;
+                      
+                        &lt;ItemGroup&gt;
+                          &lt;PackageReference Include=&quot;Microsoft.AspNetCore.App&quot; /&gt;
+                        &lt;/ItemGroup&gt;
+                      
+                    &lt;/Project&gt;
+                </i-code>
+            </section>
+            <section h3="csproj file voor het xUnit testproject">
+                <i-code xml>
+                    &lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+
+                        &lt;PropertyGroup&gt;
+                          &lt;TargetFramework&gt;netcoreapp3.1&lt;/TargetFramework&gt;
+                      
+                          &lt;IsPackable&gt;false&lt;/IsPackable&gt;
+                        &lt;/PropertyGroup&gt;
+                      
+                        &lt;ItemGroup&gt;
+                          &lt;PackageReference Include=&quot;Microsoft.AspNetCore.Mvc&quot; Version=“2.1.3&quot; /&gt;
+                          &lt;PackageReference Include=&quot;Microsoft.NET.Test.Sdk&quot; Version=&quot;15.8.0&quot; /&gt;
+                          &lt;PackageReference Include=&quot;xunit&quot; Version=&quot;2.3.1&quot; /&gt;
+                          &lt;PackageReference Include=&quot;xunit.runner.visualstudio&quot; Version=&quot;2.3.1&quot; /&gt;
+                        &lt;/ItemGroup&gt;
+                      
+                        &lt;ItemGroup&gt;
+                          &lt;ProjectReference Include=&quot;..\WebApplicationUnitTest2\WebApplicationUnitTest2.csproj&quot; /&gt;
+                        &lt;/ItemGroup&gt;
+                      
+                    &lt;/Project&gt;
+                </i-code>
+            </section>
+            <section h3="Maar nu weer terug naar het testen zelf met xUnit">
+                <ul>
+                    <li>We testen een Action-method (een unit!)
+                        <ul>
+                            <li frag> We doen geen http-Request, maar roepen de methode rechtstreeks aan</li>
+                            <li frag> Je kunt voor alle parameters een waarde meegeven (normaal bij elke method)</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Vervolgens test je het antwoord (dat van het type <i-icode>IActionResult</i-icode> is):
+                        <ul>
+                            <li frag>Is het resultaat een view?</li>
+                            <li frag>Dat kan eventueel ook de view van een ‘404 Not Found’ zijn</li>
+                            <li frag>En je kunt ook testen of een <i-icode>RedirectToAction</i-icode> wordt uitgevoerd.</li>
+                            <li frag>Welke <i-icode>ViewData</i-icode> wordt doorgegeven aan de View?</li>
+                            <li frag>Welk Model wordt doorgegeven aan de View?</li>
+                            <li frag>Zijn deze correct op basis van de input?</li>
+                        </ul>
+                    </li>
+                    <li frag>NB: De resulterende HTML wordt helemaal niet getest!!! </li>
+                </ul>
+            </section>
+            <section h3="Test meegegeven Model (1)?">
+                <p>De meeste controllers geven ook een Model mee aan de View, bijvoorbeeld:</p>
+                <i-code cs>
+                    public IActionResult Index()
+                    {
+                        List&lt;Student&gt; studentenLijst = new List&lt;Student&gt;()
+                        {
+                            new Student() { Id = 1, Name = &quot;Bert&quot;},
+                            new Student() { Id = 5, Name = &quot;Ernie&quot; }
+                        };
+                        
+                        return View(studentenLijst);
+                    }
+                </i-code>
+                <p>Hoe test je of in deze Unit het juiste model wordt meegegeven?</p>
+            </section>
+            <section h3="Test meegegeven Model (2)?">
+                <i-code cs> 	
+                    [Fact]
+                    public void AllStudents_Index_StudentController()
+                    {
+                        StudentController c = new StudentController();
+
+                        var result = c.Index();
+
+                        //result moet een view zijn
+                        var viewResult = Assert.IsType&lt;ViewResult&gt;(result);
+
+                        //checken op correcte Model Data: is het de correcte class?
+                        var model = Assert.IsAssignableFrom&lt;List&lt;Student&gt;&gt; (viewResult.ViewData.Model);
+                        //bevat het de juiste data
+                        Assert.Equal(2, model.Count);
+                        Assert.Equal("Ernie", model[1].Name);
+                        //enz.
+                    }
+                </i-code>
+            </section>
+            <section h3="Test meegegeven Model (3)?">
+                <ul>
+                    <li>
+                        Had je ook een View aangemaakt bij de Action-method Index in StudentController?
+                        <ul>
+                            <li frag>Zo ja: Hernoem deze view</li>
+                            <li frag>Zo nee: Slaagde de unittest?</li>
+                        </ul>
+                    </li>
+                    <li frag>Heb je de Action-Method ook aangeroepen in de browser?</li>
+                    <li frag>
+                        En? Werkt deze? Nee, want de browser geeft een lelijke foutmelding:
+                        <ul>
+                            <li frag>Dit is het beste bewijs dat je de View (die de HTML aanmaakt) echt niet test in je Unittest!</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Test redirect">
+                <p>Stel: je hebt op een Home-button geklikt in StudentController</p>
+                <i-code cs>
+                    public IActionResult Home(Student s)
+                    {
+                        if (ModelState.IsValid)
+                            // Hier wordt normaal data naar db geschreven. Daarna
+                            // overstap van StudentController naar HomeController.
+                            return RedirectToAction("Index", "Home"); 
+                        else 
+                            return View(s);
+                    }
+                </i-code>
+            </section>
+            <section h3="Test redirect">
+                <p>Hoe controleer je nu of Routing correct gebeurt (in dit geval naar HomeController, Action Index)?</p>
+                <i-code cs>
+                    [Fact]
+                    public void Valid_Redirect_To_HomeController()
+                    {
+                        StudentController c = new StudentController();
+
+                        var result = c.Home(null); 
+                        var redirectToActionResult =
+                                Assert.IsType&lt;RedirectToActionResult&gt;(result);
+                        Assert.Equal("Home", redirectToActionResult.ControllerName);
+                        Assert.Equal("Index", redirectToActionResult.ActionName);
+                    }
+                </i-code>
+            </section>
+            <section h3="Test Edit (1)">
+                <p>Nu zonder database, straks met:</p>
+                <i-code cs>
+                    [HttpPost] 
+                    public IActionResult Edit(Student s)
+                    {
+                        if (ModelState.IsValid)
+                            //hier hoort nog eigenlijk wegschrijven naar Db
+                            return RedirectToAction("Index"); 
+                        else 
+                            return View(s);
+                    }
+                </i-code>
+            </section>
+            <section h3="Test Edit (2) – valide student">
+                <p>Check of <i-icode>RedirectToAction</i-icode> met valide student wordt uitgevoerd</p>
+                <i-code cs>
+                    [Fact]
+                    public void Valid_Edit_StudentController()
+                    {
+                        StudentController c = new StudentController();
+                        Student s = new Student() { Name = "Willem" };
+
+                        var result = c.Edit(s);
+                        var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+
+                        // Met Assert.Null (…) controleer je of de aanroep binnen dezelfde
+                        // Controller wordt uitgevoerd.
+                        Assert.Null(redirectToActionResult.ControllerName);
+                        Assert.Equal("Index", redirectToActionResult.ActionName);
+                    }
+                </i-code>
+                <p>N.B.: <i-icode>[HttpPost]</i-icode> is voor het testen irrelevant.</p>
+            </section>
+            <section h3="Test Edit (3) – invalide student">
+                <p>Willem-Alexander heeft een te lange naam (Annotation bij Name is [MaxLength(10)])</p>
+                <i-code cs>
+                    [Fact]
+                    public void Invalid_Edit_StudentController()
+                    {
+                        StudentController c = new StudentController();
+                        Student s = new Student() { Name = "Willem-Alexander" };
+
+                        var result = c.Edit(s);
+                        var viewResult = Assert.IsType&lt;ViewResult&gt;(result);
+                        Assert.Null(viewResult.ViewName);  
+                        // als dezelfde naam als de action methode
+
+                        //Checking model enz.
+                        //Checking voor juiste foutboodschap bij de Model error
+                    }
+                </i-code>
+            </section>
+            <section h3="Test Edit (4) – invalide student">
+                <ul>
+                    <li>Huh?</li>
+                    <li> Helaas, de unittest faalt!</li>
+                    <li> Via de foutboodschap maar ook via debuggen kun je zien wat er gebeurt</li>
+                    <li> ModelState.isValid == true</li>
+                    <li> Huh? Het model bevat toch een te lange naam?</li>
+                    <li> Hierdoor kom je niet in de else van het if-statement</li>
+                </ul>
+            </section>
+            <section h3="Test Edit (5) - invalide student">
+                <ul>
+                    <li>
+                        Het valideren van de methode ModelState.isValid is ook helemaal niet nodig
+                        <ul>
+                            <li>Wie heeft deze methode gemaakt?</li>
+                            <li>Deze methode is gemaakt door developers van Microsoft en is vast OK.</li>
+                            <li>Dat hoef je dus niet meer te testen</li>
+                        </ul>
+                    </li>
+                    <li>Wat wil jij wel unittesten? <ul>
+                        <li>De code die jij zelf voor je Action-method hebt geschreven</li></ul></li>
+                    <li>Om dat goed te kunnen testen, voeg je zelf een ModelError toe</li>
+                    <li>Vervolgens kun je wel checken of jouw Action-method hier correct op reageert</li>
+                </ul>
+            </section>
+            <section h3="Test Edit (5) - invalide student">
+                <p>Dus de correcte unittest code is</p>
+                <i-code cs>
+                    [Fact]
+                    public void Invalid_Edit_StudentController()
+                    {
+                        StudentController c = new StudentController();
+                        Student s = new Student() { Name = "Willem" };
+
+                        c.ModelState.AddModelError("Error", "Name too long"); // |==
+                        var result = c.Edit(s);
+                        var viewResult = Assert.IsType<ViewResult>(result);
+                        // Met Assert.Null (…) controleer je of de View met dezelfde naam
+                        // als de Action-method wordt aangeroepen.
+                        Assert.Null(viewResult.ViewName);  
+
+                        //Checking model enz.
+                        //Checking voor juiste foutboodschap bij de Model error
+                    }
+                </i-code>
+            </section>
+            <section h2="Testen met database">
+                Hoe kun je een webapplicatie met database testen (zonder afhankelijk te zijn van de inhoud van die database)?
+            </section>
+            <section h3="Wat is mocking?">
+                <p>Lees <a href="https://en.wikipedia.org/wiki/Mock_object">dit</a> over Mock-objecten. </p>
+                <ul>
+                    <li frag>
+                        Mock-Objecten zijn een soort nepobjecten die zich net zo gedragen als een echt Object
+                        <ul>
+                            <li frag>Een Mock-object heeft precies dezelfde interface</li>
+                        </ul>
+                    </li>
+                    <li frag>Vooral bij Unittesten is dit erg handig</li>
+                    <li frag>Wat is het probleem bij een unittest als deze een query maakt naar de database?</li>
+                    <ol>
+                        <li frag>
+                            Je kunt niet meer spreken van een unittest omdat je test ook afhankelijk is van inhoud en structuur van de database
+                            <ol>
+                                <li frag>Je hebt dus een database (met inhoud) nodig om de unittest te kunnen uitvoeren</li>
+                            </ol>
+                        </li>
+                        <li frag>
+                            Je test wordt afhankelijk van de testdata die in de database staat
+                            <ol>
+                                <li frag>En wat als een andere unittest data toevoegt of verwijdert?</li>
+                                <li frag>Of als een tester dit doet tijdens een handmatige test?</li>
+                            </ol>
+                        </li>
+                    </ol>
+                </ul>
+            </section>
+            <section h3="Moq">
+                <ul>
+                    <li>Installatie <i-icode>dotnet add package Moq</i-icode> en daarna <i-icode>using Moq;</i-icode></li>
+                    <i-code cs>
+                        public interface ICaptcha
+                        {
+                            Image image { get; }
+                            bool Check(string GebruikerInvoer);
+                        }
+                        public interface ICaptchaMaker
+                        {
+                            ICaptcha MaakCaptcha(int complexiteit);
+                        }
+                        public class LoginController : Controller
+                        {
+                            public LoginController(ICaptchaMaker captchaMaker)
+                            {
+                                /* ... */
+                            }
+                        }
+                    </i-code>
+                </ul>
+            </section>
+            <section h3="InMemoryDatabase">
+                <ul>
+                    <li>Dit is een soort mocking waarbij je een tijdelijke database gebruikt (i.p.v. bijv. SQL Server)</li>
+                    <li frag> Dit wordt ook uitgelegd op http://gunnarpeipman.com/aspnet-core-ef-inmemory-database/</li>
+                    <li frag> In je unittest geef je een database-context mee die gebruik maakt van een InMemory DB</li>
+                    <li frag> Deze is veel lichter en is geen relationele database</li>
+                    <li frag> Voor iedere unittest maak je de noodzakelijke testdata aan</li>
+                    <li frag> En gooi je die na de test weer weg</li>
+                    <li frag> InMemory DB is geen serieuze vervanging voor een relationele DB, maar zeer geschikt voor tests:</li>
+                    <li frag> Je kunt bijv. data opslaan die normaal gesproken strijdig zouden zijn met de referentiële integriteit in een relationele database</li>
+                    <li frag>Voeg Microsoft.EntityFrameworkCore.InMemory toe aan het project</li>
+                </ul>
+            </section>
+            <section h3="InMemoryDatabase aanmaken (niet goed)">
+                <i-code cs size=small>
+                    private ApplicationDbContext GetInMemoryDBMetData() {
+                        ApplicationDbContext context = GetNewInMemoryDatabase();
+                        context.Add(new Student { Id = 1, Name = &quot;Jan&quot;, Leeftijd = 58 });
+                        context.Add(new Student { Id = 2, Name = &quot;Imane&quot;, Leeftijd = 19 });
+                        context.SaveChanges();
+                        return context;
+                    }
+                    private ApplicationDbContext GetNewInMemoryDatabase()
+                    {
+                        var options = new DbContextOptionsBuilder&lt;ApplicationDbContext&gt;()
+                            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                            .Options;
+                    
+                        return new ApplicationDbContext(options);
+                    }
+                </i-code>
+            </section>
+            <section h3="InMemoryDatabase aanmaken (wel goed)">
+                <p>Gebruik een clean context om Loading fouten te vinden. </p>
+                <i-code cs size=small>
+                private string databaseName; // zonder deze property kun je geen clean context maken.
+
+                private ApplicationDbContext GetInMemoryDBMetData() {
+                    ApplicationDbContext context = GetNewInMemoryDatabase(true);
+                    context.Add(new Student { Id = 1, Name = &quot;Jan&quot;, Leeftijd = 58 });
+                    context.Add(new Student { Id = 2, Name = &quot;Imane&quot;, Leeftijd = 19 });
+                    context.SaveChanges();
+                    return GetNewMemoryDatabase(false); // gebruik een nieuw (clean) object voor de context
+                }
+
+                private ApplicationDbContext GetNewInMemoryDatabase(bool NewDb)
+                {
+                    if (NewDb) this.databaseName = Guid.NewGuid().ToString(); // unieke naam
+                        
+                    var options = new DbContextOptionsBuilder&lt;ApplicationDbContext&gt;()
+                        .UseInMemoryDatabase(this.databaseName)
+                        .Options;
+
+                    return new ApplicationDbContext(options);
+                }
+                </i-code>
+            </section>
+            <section h2="Opdracht">
+                <p>We gaan verder met de webapplicatie uit week 10b. Deze mag je ook uitbreiden. </p>
+                <ul>
+                    <li>Sla de studenten nu op in een SQLite database</li>
+                    <li>Injecteer de DBContext in de controller(s)</li>
+                    <li>Maak gebruik van een InMemory Database met 5 personen.</li>
+                    <li>Schrijf 5 unit tests. </li>
+                    <li>Als je dat nodig vindt kun je voor het testen van aangeroepen methodes eventueel Moq gebruiken.</li>
+                </ul>
+            </section>
+        </i-slides>
+    <script src="code/scripts.js"></script>
+</body>
+</html>

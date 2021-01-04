@@ -1,0 +1,64 @@
+<ul>
+    <li>Maak een model klasse Student met een Id, 6 properties en een extra property "List&lt;Student&gt; Vrienden". </li>
+    <li>Voor elk van de 6 properties: voeg een data-attribute toe waarop gevalideerd kan worden client-side. </li>
+    <li>Scaffold de controller en views voor de CRUD operaties. Sla de studenten op in een SQLite database (of eventueel SQL Server). </li>
+    <li>Zorg dat er client-side en server-side validatie is. </li>
+    <li>In de footer van alle webpagina’s wil ik 3 studenten zien die voldoen aan een zelf gekozen criterium (bijv. studenten met het hoogste cijfer). Maak in je Shared View gebruik van een Partial View. Aan de Partial View geef je een IEnumerable van maximaal 3 items mee. Hint: gebruik de LINQ method Take (3).</li>
+</ul>
+<ul>
+    <li>Zorg dat je van alle gescaffolde code begrijpt wat het betekent. </li>
+    <li>Bestudeer de gegeneerde HTML van het formulier met Tag Helpers. </li>
+</ul>
+
+
+
+
+
+            
+            <section h3="Generics: een subtiel verschil">
+                Generics zijn parameters waar geen waarde in zit, maar een type. 
+                <div class="r-stack">
+                    <i-code java frag=1 class="fade-in-then-out">
+                        List list = new ArrayList();
+                        list.add(&quot;famke&quot;);
+                        list.add(&quot;donald&quot;);
+                        for (int i = 0; i &lt; list.size(); i++)
+                            System.out.println(((String)list.get(i)).length());
+                    </i-code>
+                    <i-code java frag=2 class="fade-in-then-out" data-line-numbers="4,6">
+                        List list = new ArrayList();
+                        list.add(&quot;famke&quot;);
+                        list.add(&quot;donald&quot;);
+                        list.add(2);
+                        for (int i = 0; i &lt; list.size(); i++)
+                            System.out.println(((String)list.get(i)).length()); <i class="fa fa-exclamation-triangle" style="color: red"></i>
+                    </i-code>
+                </div>
+                <i-code plaintext>
+                    <i class="fa fa-exclamation-triangle" style="color: red"></i> java.lang.ClassCastException: class java.lang.Integer to class java.lang.String
+                </i-code>
+                <i-code java frag=2 class="fade-in-then-out" data-line-numbers="4,6">
+                    List<String> list = new ArrayList<>();
+                    list.add(&quot;famke&quot;);
+                    list.add(&quot;donald&quot;);
+                    list.add(2); <i class="fa fa-exclamation-triangle" style="color: red"></i>
+                    for (int i = 0; i &lt; list.size(); i++)
+                        System.out.println(list.get(i).length());
+                </i-code>
+                <i-code plaintext>
+                    <i class="fa fa-exclamation-triangle" style="color: red"></i> java: incompatible types: int cannot be converted to java.lang.String
+                </i-code>
+                In JAVA: statisch wat automatische type checks, runtime zijn alle type checks weg!
+
+                List<String> list; ((List)list).add(new Object()); -> foutmelding alleen bij het opvragen ?!?!
+
+                    C#: RTTI
+
+                    C++: templates
+
+                    http://www.jprl.com/Blog/archive/development/2007/Aug-31.html
+                    https://stackoverflow.com/questions/36347/what-are-the-differences-between-generic-types-in-c-and-java
+                    https://stackoverflow.com/questions/355060/c-sharp-vs-java-generics
+                    https://stackoverflow.com/questions/520527/why-do-some-claim-that-javas-implementation-of-generics-is-bad?noredirect=1&lq=1
+                
+            </section>

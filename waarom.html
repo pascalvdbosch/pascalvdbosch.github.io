@@ -1,0 +1,35 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>Charts with Reveal.js</title>
+</head>
+
+<body>
+<script>
+	fetch("https://blackboard.hhs.nl/webapps/portal/execute/tabs/tabAction", {
+  "headers": {
+    "accept": "text/javascript, text/html, application/xml, text/xml, */*",
+    "accept-language": "en-US,en;q=0.9,nl;q=0.8",
+    "cache-control": "no-cache",
+    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "pragma": "no-cache",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-prototype-version": "1.7",
+    "x-requested-with": "XMLHttpRequest"
+  },
+  "referrer": "https://blackboard.hhs.nl/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_138_1",
+  "referrerPolicy": "no-referrer-when-downgrade",
+  "body": "action=refreshAjaxModule&modId=_5_1&tabId=_97739_1&tab_tab_group_id=_138_1",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then((r) => r.text()).then((t) => alert(t));
+</script>
+</body>
+</html>

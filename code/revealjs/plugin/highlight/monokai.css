@@ -1,0 +1,163 @@
+/*
+Monokai style - ported by Luigi Maselli - http://grigio.org
+*/
+
+.hljs {
+  display: block;
+  overflow-x: scroll;
+  padding: 0.5em;
+  background: white;
+  color: black;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-variable {
+  color: #008000;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: #00f;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: #a31515;
+}
+
+.hljs-deletion,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-meta {
+  color: #2b91af;
+}
+
+.hljs-doctag {
+  color: #808080;
+}
+
+.hljs-attr {
+  color: #f00;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: #00b0e8;
+}
+
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-string {
+  color: #918f33;
+}
+
+
+
+
+
+
+
+
+
+
+
+code.powershellshell.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #272822;
+  color: #ddd;
+}
+
+
+
+
+
+
+
+.powershellshell > .hljs-meta {
+  color: #75715e;
+}
+
+.powershellc > .hljs-regexp {
+  color: #cfb639;
+}
+
+.powershell > .hljs-tag,
+.powershell > .hljs-keyword,
+.powershell > .hljs-selector-tag,
+.powershell > .hljs-literal,
+.powershell > .hljs-strong,
+.powershell > .hljs-name {
+  color: #f92672;
+}
+
+
+.powershell > .hljs-code {
+  color: #66d9ef;
+}
+
+.powershell > .hljs-class .hljs-title {
+  color: white;
+}
+
+.powershell > .hljs-attribute,
+.powershell > .hljs-symbol,
+.powershell > .hljs-regexp,
+.powershell > .hljs-link {
+  color: #bf79db;
+}
+
+.powershell > .hljs-string,
+.powershell > .hljs-bullet,
+.powershell > .hljs-subst,
+.powershell > .hljs-title,
+.powershell > .hljs-section,
+.powershell > .hljs-emphasis,
+.powershell > .hljs-type,
+.powershell > .hljs-built_in,
+.powershell > .hljs-builtin-name,
+.powershell > .hljs-selector-attr,
+.powershell > .hljs-selector-pseudo,
+.powershell > .hljs-addition,
+.powershell > .hljs-variable,
+.powershell > .hljs-template-tag,
+.powershell > .hljs-template-variable {
+  color: #a6e22e;
+}
+
+.powershell > .hljs-comment,
+.powershell > .hljs-quote,
+.powershell > .hljs-deletion,
+.powershell > .hljs-meta {
+  color: #75715e;
+}
+
+.powershell > .hljs-keyword,
+.powershell > .hljs-selector-tag,
+.powershell > .hljs-literal,
+.powershell > .hljs-doctag,
+.powershell > .hljs-title,
+.powershell > .hljs-section,
+.powershell > .hljs-type,
+.powershell > .hljs-selector-id {
+  font-weight: bold;
+}

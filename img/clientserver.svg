@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 756 255" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <rect x="30" y="30" width="120" height="150" style="fill: rgb(216, 216, 216);"/>
+  <text x="90" y="105" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Browser</text>
+  <rect width="180" height="210" style="fill: none; stroke: rgb(0, 0, 0); stroke-dasharray: 4px;"/>
+  <rect width="350" height="210" style="fill: none; stroke: rgb(0, 0, 0); stroke-dasharray: 4px;" x="400"/>
+  <text x="90" y="230" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Clientside</text>
+  <text style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="230" x="575">Server side</text>
+
+
+  <text x="290" y="230" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Internet</text>
+  
+
+  <rect x="430" y="30" width="150" height="150" style="fill: rgb(216, 216, 216);"/>
+  <rect x="445" y="45" width="120" height="62.338" style="fill: rgb(177, 177, 177);"/>
+  <text transform="matrix(1, 0, 0, 1, 465, -70)" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="134.103" x="38.747">ASP.NET<tspan x="38.74700164794922" dy="1em">​</tspan>MVC</text>
+  <text x="249.366" y="175" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" transform="matrix(1, 0, 0, 1, 255, -47.822254)">Webserver<tspan x="249.36599731445312" dy="1em">​</tspan>(IIS)</text>
+  
+  <path d="M 150 55 H 390 L 390 39.396 L 430 59.396 L 390 79.396 L 390 64.396 H 150 V 55 Z" style="fill: rgb(216, 216, 216);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041"/>
+  <path d="M -430 -158.396 H -190 L -190 -173.396 L -150 -153.396 L -190 -133.396 L -190 -148.396 H -430 V -158.396 Z" style="fill: rgb(216, 216, 216);" transform="matrix(-1, 0, 0, -1, 0, 0)" bx:shape="arrow -405.197 -173.396 249.352 40 10 48.437 0 1@a7d7115b"/>
+
+  <rect x="600" y="45" width="120" height="62.338" style="fill: rgb(177, 177, 177);"/>
+  <text style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="75" x="660">Database</text>
+  <text x="290" y="150" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px;text-anchor: middle; dominant-baseline: central;">HTTP Response</text>
+  <text x="290" y="60" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px;text-anchor: middle; dominant-baseline: central;">HTTP Request</text>
+
+  <path d="M 565 55 H 580 L 580 50 L 600 60 L 580 70 L 580 64.396 H 565 V 55 Z" style="fill: rgb(177, 177, 177);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041"/>
+  <path d="M 600 85 H 580 L 580 80 L 565 90 L 580 100 L 580 95 H 600 V 85 Z" style="fill: rgb(177, 177, 177);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041"/>
+  
+</svg>

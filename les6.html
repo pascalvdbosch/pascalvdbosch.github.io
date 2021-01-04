@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="nl">
+<head>
+   <meta charset="utf-8">
+    <title>ORM</title>
+    <meta name="keywords" content="Object,Relational,Mapping,probleemdomein,EF Core,Entity Framework,DBContext,Many-Many" />
+    <meta name="description" content="Les 6">
+</head>
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="ORM">
+                <p>Object Relational Mapping</p>
+                <img src="img/ORMproblem.png" alt="">
+            </section>
+            <section h3="Softwareontwikkeling">
+                <img src="img/softwaredevcycle.svg" alt="">
+                Bron: <a href="https://sumatosoft.com/software-development-lifecycle">Sumatosoft</a>
+            </section>
+            <section h3="Herinner...">
+                <ul>
+                    <li>Tijdens <em>analyse</em> maken we een model van het <em>pobleemdomein</em></li>
+                    <li frag>
+                        Tijdens <em>ontwerp</em> maken we
+                        <ul>
+                            <li frag>een datamodel van de <em>database</em> [herinner: DB Design Semester 3], en</li>
+                            <li frag>een klassemodel van de <em>code</em> [herinner: UML Semester 2]</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                       Er is een mismatch!
+                        <ul>
+                           <li frag>Een <i-icode>string</i-icode> wordt een <i-icode>varchar</i-icode></li>
+                        </ul>
+                    </li>
+                    <li frag>Onderhoudbaarheid/wijzigbaarheid: aanpassen database-schema -> aanpassen java-code &amp; queries aanpassen</li>
+                </ul>
+            </section>
+            <section h3="Herinner">
+                <img src="img/slidedb.PNG" alt="">
+            </section>
+            <section h3="De onhandige oplossing">
+                <sided>
+                    <side><svg
+                   xmlns:dc="http://purl.org/dc/elements/1.1/"
+                   xmlns:cc="http://creativecommons.org/ns#"
+                   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                   xmlns:svg="http://www.w3.org/2000/svg"
+                   xmlns="http://www.w3.org/2000/svg"
+                   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+                   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+                   width="210mm"
+                   height="297mm"
+                   viewBox="0 0 210 297"
+                   version="1.1"
+                   id="svg8"
+                   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+                   sodipodi:docname="codevddatabase.svg">
+                  <defs
+                     id="defs2">
+                    <marker
+                       inkscape:isstock="true"
+                       style="overflow:visible;"
+                       id="marker5235"
+                       refX="0.0"
+                       refY="0.0"
+                       orient="auto"
+                       inkscape:stockid="Arrow1Mend">
+                      <path
+                         transform="scale(0.4) rotate(180) translate(10,0)"
+                         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+                         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+                         id="path5233" />
+                    </marker>
+                    <marker
+                       inkscape:stockid="Arrow1Mend"
+                       orient="auto"
+                       refY="0.0"
+                       refX="0.0"
+                       id="Arrow1Mend"
+                       style="overflow:visible;"
+                       inkscape:isstock="true"
+                       inkscape:collect="always">
+                      <path
+                         id="path4900"
+                         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+                         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+                         transform="scale(0.4) rotate(180) translate(10,0)" />
+                    </marker>
+                    <marker
+                       inkscape:isstock="true"
+                       style="overflow:visible;"
+                       id="marker5175"
+                       refX="0.0"
+                       refY="0.0"
+                       orient="auto"
+                       inkscape:stockid="Arrow1Send">
+                      <path
+                         transform="scale(0.2) rotate(180) translate(6,0)"
+                         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+                         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+                         id="path5173" />
+                    </marker>
+                  </defs>
+                  <sodipodi:namedview
+                     id="base"
+                     pagecolor="#ffffff"
+                     bordercolor="#666666"
+                     borderopacity="1.0"
+                     inkscape:pageopacity="0.0"
+                     inkscape:pageshadow="2"
+                     inkscape:zoom="1.979899"
+                     inkscape:cx="490.15385"
+                     inkscape:cy="656.24173"
+                     inkscape:document-units="mm"
+                     inkscape:current-layer="layer1"
+                     showgrid="false"
+                     inkscape:snap-object-midpoints="true"
+                     inkscape:snap-center="true"
+                     inkscape:snap-others="false"
+                     inkscape:window-width="1920"
+                     inkscape:window-height="1147"
+                     inkscape:window-x="1042"
+                     inkscape:window-y="-8"
+                     inkscape:window-maximized="1">
+                    <inkscape:grid
+                       type="xygrid"
+                       id="grid815" />
+                  </sodipodi:namedview>
+                  <metadata
+                     id="metadata5">
+                    <rdf:RDF>
+                      <cc:Work
+                         rdf:about="">
+                        <dc:format>image/svg+xml</dc:format>
+                        <dc:type
+                           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                        <dc:title></dc:title>
+                      </cc:Work>
+                    </rdf:RDF>
+                  </metadata>
+                  <g
+                     inkscape:label="Layer 1"
+                     inkscape:groupmode="layer"
+                     id="layer1">
+                    <rect
+                       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                       id="rect817"
+                       width="30.000006"
+                       height="5"
+                       x="54.999996"
+                       y="82" />
+                    <text
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="58.565422"
+                       y="85.760902"
+                       id="text821"><tspan
+                         sodipodi:role="line"
+                         id="tspan819"
+                         x="58.565422"
+                         y="85.760902"
+                         style="stroke-width:0.26458332">Docent</tspan></text>
+                    <rect
+                       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                       id="rect817-1"
+                       width="29.999996"
+                       height="15"
+                       x="54.999996"
+                       y="87" />
+                    <text
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="56.606026"
+                       y="90.815163"
+                       id="text4543"><tspan
+                         sodipodi:role="line"
+                         id="tspan4541"
+                         x="56.606026"
+                         y="90.815163"
+                         style="stroke-width:0.26458332">-code: int</tspan></text>
+                    <text
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="56.606026"
+                       y="95.815163"
+                       id="text4543-5"><tspan
+                         sodipodi:role="line"
+                         id="tspan4541-7"
+                         x="56.606026"
+                         y="95.815163"
+                         style="stroke-width:0.26458332">-naam: string</tspan></text>
+                    <text
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="56.492641"
+                       y="100.81516"
+                       id="text4543-3"><tspan
+                         sodipodi:role="line"
+                         id="tspan4541-0"
+                         x="56.492641"
+                         y="100.81516"
+                         style="stroke-width:0.26458332">-salaris: double</tspan></text>
+                    <rect
+                       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                       id="rect817-1-1"
+                       width="29.999996"
+                       height="15"
+                       x="55.000004"
+                       y="102" />
+                    <g
+                       id="g5333" frag=1
+                       inkscape:label="obj1">
+                      <rect
+                         y="119.5"
+                         x="55.000008"
+                         height="5"
+                         width="42.5"
+                         id="rect817-6"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text821-2"
+                         y="123.31516"
+                         x="58.439121"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="123.31516"
+                           x="58.439121"
+                           id="tspan819-4"
+                           sodipodi:role="line">Bob : Docent</tspan></text>
+                      <rect
+                         y="124.5"
+                         x="55.000004"
+                         height="15"
+                         width="42.499996"
+                         id="rect817-1-9"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text4543-33"
+                         y="128.31516"
+                         x="56.606033"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="128.31516"
+                           x="56.606033"
+                           id="tspan4541-5"
+                           sodipodi:role="line">-code: int = 1256</tspan></text>
+                      <text
+                         id="text4543-5-4"
+                         y="133.31516"
+                         x="56.606033"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="133.31516"
+                           x="56.606033"
+                           id="tspan4541-7-2"
+                           sodipodi:role="line">-naam: string = &quot;Bob&quot;</tspan></text>
+                      <text
+                         id="text4543-3-6"
+                         y="138.31516"
+                         x="56.492649"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="138.31516"
+                           x="56.492649"
+                           id="tspan4541-0-0"
+                           sodipodi:role="line">-salaris: double = 20.5</tspan></text>
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4650"
+                         d="M 58.066964,123.93304 H 81.814918"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                    </g>
+                    <g
+                       id="g5320" frag=2
+                       inkscape:label="obj2">
+                      <rect
+                         y="142"
+                         x="54.999992"
+                         height="5"
+                         width="42.500004"
+                         id="rect817-6-5"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text821-2-7"
+                         y="145.81517"
+                         x="58.43911"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="145.81517"
+                           x="58.43911"
+                           id="tspan819-4-6"
+                           sodipodi:role="line">Eva : Docent</tspan></text>
+                      <rect
+                         y="147"
+                         x="54.999985"
+                         height="15"
+                         width="42.499996"
+                         id="rect817-1-9-7"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text4543-33-7"
+                         y="150.81517"
+                         x="57.081474"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="150.81517"
+                           x="57.081474"
+                           id="tspan4541-5-3"
+                           sodipodi:role="line">-code: int = 1257</tspan></text>
+                      <text
+                         id="text4543-5-4-4"
+                         y="155.81516"
+                         x="56.606018"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="155.81516"
+                           x="56.606018"
+                           id="tspan4541-7-2-9"
+                           sodipodi:role="line">-naam: string = &quot;Eva&quot;</tspan></text>
+                      <text
+                         id="text4543-3-6-6"
+                         y="160.81516"
+                         x="56.49263"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="160.81516"
+                           x="56.49263"
+                           id="tspan4541-0-0-0"
+                           sodipodi:role="line">-salaris: double = 30.6</tspan></text>
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4650-3"
+                         d="M 58.066949,146.43304 H 81.814904"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                    </g>
+                    <g
+                       id="g5307" frag=3
+                       inkscape:label="db">
+                      <rect
+                         y="129.5"
+                         x="137.49998"
+                         height="15"
+                         width="44.999996"
+                         id="rect817-1-1-9"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text4719"
+                         y="133.31516"
+                         x="140.28883"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="font-weight:bold;stroke-width:0.26458332"
+                           y="133.31516"
+                           x="140.28883"
+                           id="tspan4717"
+                           sodipodi:role="line">code</tspan></text>
+                      <text
+                         id="text4723"
+                         y="132.96291"
+                         x="154.51196"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="font-weight:bold;stroke-width:0.26458332"
+                           y="132.96291"
+                           x="154.51196"
+                           id="tspan4721"
+                           sodipodi:role="line">naam</tspan></text>
+                      <text
+                         id="text4727"
+                         y="133.31516"
+                         x="168.42331"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="font-weight:bold;stroke-width:0.26458332"
+                           y="133.31516"
+                           x="168.42331"
+                           id="tspan4725"
+                           sodipodi:role="line">salaris</tspan></text>
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4729"
+                         d="m 152.5,129.5 v 15"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4731"
+                         d="m 167.5,129.5 v 15"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4733"
+                         d="m 137.5,134.5 h 45"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                      <path
+                         inkscape:connector-curvature="0"
+                         id="path4735"
+                         d="m 137.5,139.5 h 45"
+                         style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                      <text
+                         id="text4739"
+                         y="138.28415"
+                         x="140.42577"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="138.28415"
+                           x="140.42577"
+                           id="tspan4737"
+                           sodipodi:role="line">1256</tspan></text>
+                      <text
+                         id="text4743"
+                         y="143.28416"
+                         x="140.46539"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="143.28416"
+                           x="140.46539"
+                           id="tspan4741"
+                           sodipodi:role="line">1257</tspan></text>
+                      <text
+                         id="text4747"
+                         y="138.31516"
+                         x="156.51614"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="138.31516"
+                           x="156.51614"
+                           id="tspan4745"
+                           sodipodi:role="line">Bob</tspan></text>
+                      <text
+                         id="text4751"
+                         y="143.26091"
+                         x="156.74611"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="143.26091"
+                           x="156.74611"
+                           id="tspan4749"
+                           sodipodi:role="line">Eva</tspan></text>
+                      <text
+                         id="text4755"
+                         y="138.28415"
+                         x="171.09499"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="138.28415"
+                           x="171.09499"
+                           id="tspan4753"
+                           sodipodi:role="line">20.5</tspan></text>
+                      <text
+                         id="text4759"
+                         y="143.28416"
+                         x="171.04675"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="143.28416"
+                           x="171.04675"
+                           id="tspan4757"
+                           sodipodi:role="line">30.6</tspan></text>
+                    </g>
+                    <g
+                    frag=6
+                       id="g4779"
+                       inkscape:label="extra">
+                      <text
+                         id="text4763"
+                         y="105.6076"
+                         x="55.891167"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="105.6076"
+                           x="55.891167"
+                           id="tspan4761"
+                           sodipodi:role="line">+insert()</tspan></text>
+                      <text
+                         id="text4767"
+                         y="110.6076"
+                         x="55.891167"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="110.6076"
+                           x="55.891167"
+                           id="tspan4765"
+                           sodipodi:role="line">+delete()</tspan></text>
+                      <text
+                         id="text4771"
+                         y="115.47324"
+                         x="55.891167"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="115.47324"
+                           x="55.891167"
+                           id="tspan4769"
+                           sodipodi:role="line">+update()</tspan></text>
+                    </g>
+                    <g
+                    frag=7
+                       id="g4874"
+                       inkscape:label="dbinserter">
+                      <rect
+                         y="82"
+                         x="87.499992"
+                         height="5"
+                         width="30.000006"
+                         id="rect817-7"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <text
+                         id="text821-6"
+                         y="85.760902"
+                         x="91.065422"
+                         style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                         xml:space="preserve"><tspan
+                           style="stroke-width:0.26458332"
+                           y="85.760902"
+                           x="91.065422"
+                           id="tspan819-9"
+                           sodipodi:role="line">DBInserter</tspan></text>
+                      <rect
+                         y="92"
+                         x="87.5"
+                         height="15"
+                         width="29.999996"
+                         id="rect817-1-1-2"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                      <g
+                         id="g4779-1"
+                         transform="translate(32.5,-10)">
+                        <text
+                           xml:space="preserve"
+                           style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                           x="55.891167"
+                           y="105.6076"
+                           id="text4763-7"><tspan
+                             sodipodi:role="line"
+                             id="tspan4761-4"
+                             x="55.891167"
+                             y="105.6076"
+                             style="stroke-width:0.26458332">+insert()</tspan></text>
+                        <text
+                           xml:space="preserve"
+                           style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                           x="55.891167"
+                           y="110.6076"
+                           id="text4767-8"><tspan
+                             sodipodi:role="line"
+                             id="tspan4765-4"
+                             x="55.891167"
+                             y="110.6076"
+                             style="stroke-width:0.26458332">+delete()</tspan></text>
+                        <text
+                           xml:space="preserve"
+                           style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                           x="55.891167"
+                           y="115.47324"
+                           id="text4771-8"><tspan
+                             sodipodi:role="line"
+                             id="tspan4769-6"
+                             x="55.891167"
+                             y="115.47324"
+                             style="stroke-width:0.26458332">+update()</tspan></text>
+                      </g>
+                      <rect
+                         y="87"
+                         x="87.5"
+                         height="5"
+                         width="29.999996"
+                         id="rect817-1-1-2-1"
+                         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                    </g>
+                    <path
+                    frag=5
+                       style="fill:none;stroke:#000000;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5235)"
+                       d="m 97.5,129.5 c 20,0 40,7.5 40,7.5"
+                       id="path4887"
+                       inkscape:connector-curvature="0"
+                       inkscape:label="pijl1" />
+                    <path
+                    frag=5
+                       style="fill:none;stroke:#000000;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
+                       d="m 97.5,154.5 c 27.5,0 40,-12.5 40,-12.5"
+                       id="path4889"
+                       inkscape:connector-curvature="0"
+                       inkscape:label="pijl2" />
+                    <path
+                    frag=4
+                       style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.52916663, 1.05833327;stroke-dashoffset:0;stroke-opacity:1"
+                       d="M 122.5,74.499998 V 169.5"
+                       id="path5255"
+                       inkscape:connector-curvature="0"
+                       inkscape:label="lijn" />
+                    <text
+                    frag=4
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="110.47831"
+                       y="75.815163"
+                       id="text5259"
+                       inkscape:label="code"><tspan
+                         sodipodi:role="line"
+                         id="tspan5257"
+                         x="110.47831"
+                         y="75.815163"
+                         style="stroke-width:0.26458332">Code</tspan></text>
+                    <text
+                    frag=4
+                       xml:space="preserve"
+                       style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                       x="126.50095"
+                       y="75.815163"
+                       id="text5263"><tspan
+                         sodipodi:role="line"
+                         id="tspan5261"
+                         x="126.50095"
+                         y="75.815163"
+                         style="stroke-width:0.26458332">Database</tspan></text>
+                    <rect
+                    frag=7
+                       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.52916662, 1.05833324;stroke-dashoffset:0;stroke-opacity:1"
+                       id="rect5341"
+                       width="25.188988"
+                       height="14.220424"
+                       x="55.472466"
+                       y="102.30711"
+                       inkscape:label="wit" />
+                  </g>
+                </svg></side>
+                    <side>
+                        <p frag=6>C# code: </p>
+                        <i-code cs size=small frag=6>
+                            public class Docent
+                            {
+                                private int code;
+                                private string naam;
+                                private double salaris;
+                                public void delete()
+                                {
+                                    string query = "delete from docent where code =" + code;
+                                    Database.executeDeleteQuery(query);
+                                }
+                            }
+                        </i-code>
+                        <p frag=6>SQL code: </p>
+                        <i-code sql size=small frag=6>
+                            CREATE TABLE docent
+                            (
+                                code int(10) unsigned NOT NULL auto_increment, 
+                                naam varchar(45) NOT NULL,  
+                                salaris double, 
+                                PRIMARY KEY (code)
+                            )
+                        </i-code>
+                        <p frag=7>Beide oplossingen niet ideaal. </p>
+                    </side>
+                </sided>
+            </section>
+            <section h3="We willen alles automatisch!">
+               <sided>
+                   <side>
+                      C# code: 
+                     <i-code size=small cs>
+                        public class MyContext : DbContext
+                        {
+                            protected override void OnConfiguring(DbContextOptionsBuilder b) =&gt;
+                            b.UseSqlite(&quot;Data Source=database.db&quot;);
+                            // b.UseSqlServer(...)
+                            public DbSet&lt;Student&gt; Studenten { get; set; }
+                        }
+                        public class Grade
+                        {
+                            public int Id { get; set; }
+                            public int Value { get; set; }
+                        }
+                        public class Student
+                        {
+                            public int Id { get; set; }
+                            public string Naam { get; set; }
+                            public List&lt;Grade&gt; Grades { get; set; }
+                        }
+                     </i-code>
+                   </side>
+                   <side>
+                      <p>CREATE code: </p>
+                   <i-code sql size=small>
+                     CREATE TABLE "Studenten" (
+                        "Id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        "Naam" TEXT NULL
+                      )
+                      CREATE TABLE "Grade" (
+                        "Id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        "Value" INTEGER NOT NULL,
+                        "StudentId" INTEGER NULL,
+                        FOREIGN KEY ("StudentId") REFERENCES 
+                            "Studenten" ("Id") ON DELETE RESTRICT
+                      )
+                   </i-code>
+                   <p>Event handlers (achter de schermen):</p>
+                   <i-code cs size=small>
+                     public class Grade_db : Grade
+                     {
+                        public int Id { get; set; }
+                        public int Value
+                        {
+                           get { return connectie.sql("Select ..."); }
+                           set { connectie.sql("Insert Into ...") }
+                        }
+                     }
+                   </i-code>
+                   </side>
+               </sided>
+               <i-notes>
+                  Teken over het scherm heen!
+               </i-notes>
+            </section>
+            <section h3="Object relational mapper">
+                <sided>
+                    <side>
+                       <ul>
+                          <li>
+                           O/R mapping zit tussen de applicatie en de database.
+                          </li>
+                          <li frag>
+                           O/R mapping vertaalt opdrachten van een applicatie naar opdrachten voor DBMS (maakt van het model een correcte SQL-opdracht die &eacute;&eacute;n van de CRUDS-operaties implementeert).
+                          </li>
+                          <li frag>
+                           O/R mapping stopt de data niet meer in een ResultSet, maar vertaalt de data uit de database direct naar objecten in het Model.
+                          </li>
+                          <li frag>
+                           Code bevat geen SQL meer (security). 
+                          </li>
+                          <li frag>
+                              Minder code nodig, want de O/R mapping vervangt o.a. SELECT-, INSERT-, UPDATE- en DELETE-opdrachten. 
+                          </li>
+                          <li frag>
+                              "Onafhankelijk" van DBMS (MS SQL Server, MySQL, PostgreSQL, etc.)
+                          </li>
+                       </ul>
+                    </side>
+                    <side><img src="img/ORM.svg" alt=""></side>
+                </sided>
+                <i-notes>
+                   Niet meer werken met een database-library met Connection-, Statement
+                </i-notes>
+            </section>
+            <section h3="Code First" style="text-align: left;">
+               <p>Vergelijken</p>
+               <ul>
+                  <li>Er is ook Database First, welke is beter?</li>
+                  <li frag>Bij Code First wordt voorkom je dat de klassen "anemic" worden</li>
+                  <li frag>Bij Domain Driven Development (DDD) is het domein model rijk, dus Code First</li>
+               </ul>
+               <p frag>Wat wordt er allemaal gedaan?</p>
+               <p frag>Wat is het verschil tussen data model en klassediagram?</p>
+               <ul>
+                  <li frag>ID's</li>
+                  <li frag>Van datastructuur (lijst) naar foreign keys</li>
+                  <li frag>Tussentabellen voor many-to-many</li>
+                  <li frag>Overerving: Single Table Inheritance / Multiple Table Inheritance</li>
+                  <li frag>Gewenste redudatie in de code wordt genormaliseerd</li>
+                  <li frag>Performance: indexen in de database</li>
+                  <li frag>Overig: extra constraints/checks/triggers/...</li>
+               </ul>
+               <i-notes>
+                  <ul>
+                     <li>detail groter in klasse model</li>
+                     <li> student met telefoonnummer (zwak entiteit, key=studentid+volgnummer)</li>
+                  </ul>
+                  </i-notes>
+            </section>
+            <section h2="Entity Framework Core">
+            </section>
+            <section h3="Hoe?">
+               <p>Stappen: </p>
+               <ul>
+                  <li>"Installeer" Entity Framework Core</li>
+                  <li frag>Maak C# klasse aan</li>
+                  <li frag>Maak C# <i-icode>DbContext</i-icode> aan (connectie-instellingen)</li>
+                  <li frag>Maak de database aan met 1 druk op de knop</li>
+               </ul>
+            </section>
+            <section h4="Hoe? Installeer EF core">
+               <p>Stappen: </p>
+               <ul>
+                  <li>
+                     "Installeer" Entity Framework Core:
+                     <ul>
+                        <li>
+                           Nodig: 
+<ul>
+   <li><i-icode>Microsoft.EntityFrameworkCore.Design</i-icode></li>
+   <li><i-icode>Microsoft.EntityFrameworkCore.Sqlite</i-icode></li>
+   <li><i-icode>Microsoft.EntityFrameworkCore.Tools</i-icode></li>
+</ul>
+                        </li>
+                        <li>
+                           Voor <img vs>
+                           <ul>
+                              <li>
+                                 Gebruik de Package Manager Console: 
+                                 <i-icode>
+                                    Install-Package ...
+                                 </i-icode>
+                              </li>
+                              <li>
+                                 Dependencies -> Manage NuGet Packages -> Browse -> ... -> Install
+                              </li>
+                           </ul>
+                        </li>
+                        <li>
+                           Voor <img vscode>: 
+                           <i-code shell autofit size=normal>> dotnet add package ...</i-code>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </section>
+            <section h4="Hoe? Maak C# klassen aan">
+               <i-code cs>
+                  public class Grade
+                  {
+                      public int Id { get; set; }
+                      public int Value { get; set; }
+                  }
+                  public class Student
+                  {
+                      public int Id { get; set; }
+                      public string Naam { get; set; }
+                      public List&lt;Grade&gt; Grades { get; set; }
+                  }
+               </i-code>
+            </section>
+            <section h4="Hoe? Maak C# DbContext aan">
+               <i-code cs>
+                  public class MyContext : DbContext
+                  {
+                     protected override void OnConfiguring(DbContextOptionsBuilder b) =&gt;
+                     b.UseSqlite(&quot;Data Source=database.db&quot;);
+                     public DbSet&lt;Student&gt; Studenten { get; set; }
+                  }
+               </i-code>
+            </section>
+            <section h4="Maak database aan: 1 druk op de knop">
+               <ul>
+                  <li>
+                     In <img vs> gebruiken we de Package manager console: 
+                     <i-code>
+                        Add-Migration MijnEersteMigration
+                        Update-Database
+                     </i-code>
+                  </li>
+                  <li>
+                     In <img vscode>: 
+                     <i-code>
+                        > dotnet ef migrations add MijnEersteMigration
+                        > dotnet ef database update
+                     </i-code>
+                  </li>
+               </ul>
+            </section>
+            <section h3="Bekijk de database">
+               <ul>
+                  <li>
+                     Voor SQL Server: 
+                     <ul>
+                        <li>Voor <img vs>: <i>SQL Server Object Explorer</i></li>
+                        <li>Voor <img vscode>: gebruik de extensie <i>SQL Server (mssql)</i></li>
+                     </ul>
+                  </li>
+                  <li>
+                     Voor SQLite: 
+                     <ul>
+                        <li>Voor <img vs>: gebruik externe tool <i>DB Browser for SQLite</i></li>
+                        <li>Voor <img vscode>: gebruik de extensie <i>SQLite</i></li>
+                     </ul>
+                  </li>
+               </ul>
+            </section>
+            <section h3="Showtime: vanuit C# studenten aanmaken">
+               <i-code cs>
+                  DbContext mycontext = new MyContext();
+                  var Bob = new Student { Naam = &quot;Bob&quot; };
+                  Bob.Grades.Add(new Grade { Value = 5 });
+                  mycontext.Add(Bob);
+                  // verwijderen en aanpassen gaat even makkelijk
+                  mycontext.SaveChanges();
+                  Console.WriteLine(mycontext.Studenten.Where(s =&gt; s.Naam.StartsWith(&quot;B&quot;)).Count());
+               </i-code>
+               <ul>
+                  <li frag>ID's worden automatisch aangemaakt!</li>
+                  <li frag>Zodra je de C# klasse aanpast, krijg je een foutmelding. 
+                     <ul>
+                        <li frag>Voeg een migration toe met een nieuwe naam</li>
+                        <li frag>Update de database</li>
+                     </ul>
+                  </li>
+                  <li frag>
+                     Er is veel magie: 
+                     <ul>
+                        <li>Moet <i-icode>Id</i-icode> heten</li>
+                        <li>Moeten properties gebruiken</li>
+                        <li>...</li>
+                     </ul>
+                  </li>
+               </ul>
+            </section>
+            <section h2="Entity Framework Core: ingewikkelder"></section>
+            <section h3="Database configureren: Data-annotaties">
+               <p>De volgende annotaties moeten jullie kennen: </p>
+               <ul>
+                  <li><i-icode>[Key]</i-icode></li>
+                  <li><i-icode>[Required]</i-icode></li>
+                  <li><i-icode>[StringLength]</i-icode></li>
+                  <li><i-icode>[Table]</i-icode></li>
+                  <li><i-icode>[Column]</i-icode></li>
+                  <li><i-icode>[NotMapped]</i-icode></li>
+               </ul>
+               <p>Voorbeeld: </p>
+               <i-code cs size=small>
+                  [Table(&quot;Students&quot;)]
+                  public class Student
+                  {
+                     [Key] public int StudentNr { get; set; }
+                     [Required] [StringLength(20)] public string Naam { get; set; }
+                     public List&lt;Grade&gt; Grades { get; set; } = new List&lt;Grade&gt;();
+                  }
+               </i-code>
+            </section>
+            <section h3="Database configureren: Fluent API">
+               <i-code cs> 	
+                  public class MyContext : DbContext
+                  {
+                     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =&gt;
+                        optionsBuilder.UseSqlite(@&quot;Data Source=database.db&quot;);
+                     public DbSet&lt;Student&gt; Studenten { get; set; }
+                     protected override void OnModelCreating(ModelBuilder b)
+                     {
+                        b.Entity&lt;Student&gt;()
+                              .Property(s =&gt; s.Naam)
+                              .IsRequired()
+                              .HasMaxLength(20);
+                     }
+                  }
+               </i-code>
+               <p frag>Met de Fluent API kan je meer dan data annotaties 👍, maar ingewikkelder en gescheiden van de code 👎. </p>
+            </section>
+            <section h3="Seeden van database">
+               <p>Later hierover meer...</p>
+               <i-code cs> 
+                  public static class DbInitializer
+                  {
+                     public static void Initialize(MyContext context)
+                     {
+                        if (context.Studenten.Any()) return;
+                        context.Studenten.Add(new Student { Naam = "Bob" });
+                        context.Studenten.Add(new Student { Naam = "Alice" });
+                        context.SaveChanges();
+                     }
+                  }
+               </i-code> 
+            </section>
+            <section h3="Relaties">
+            </section>
+            <section h4="Hoe zat dat ook al weer? Vergeet EF even...">
+               <sided>
+                   <side style="width:400px">
+                      <img src="img/relaties.svg" alt="" style="width:500px">
+                   </side>
+                   <side>
+                      <div class="r-stack">
+                         <i-code cs frag=1 class="fade-in-then-out">
+                           public class Student
+                           {
+                              public Student()
+                              {
+                                 Adres = new Adres();
+                              }
+                              public Adres Adres { get; set; }
+                           }
+                         </i-code>
+                         <i-code cs frag=2 class="fade-in-then-out">
+                           public class Student
+                           {
+                              public Student() { }
+                              public Adres Adres { get; set; }
+                           }
+                         </i-code>
+                         <i-code cs frag=3>
+                           public class Student
+                           {
+                              public Student()
+                              {
+                                 adressen = new List&lt;Adres&gt;();
+                              }
+                              private List&lt;Adres&gt; adressen;
+                              public void voegAdresToe(Adres a)
+                              {
+                                 if (!adressen.Contains(a))
+                                    adressen.Add(a);
+                              }
+                           }
+                         </i-code>
+                      </div>
+                   </side>
+               </sided>
+            </section>
+            <section h4="Nu in EF Core">
+               <sided>
+                   <side style="width:400px">
+                      <img src="img/relaties.svg" alt="" style="width:500px">
+                   </side>
+                   <side>
+                      <div class="r-stack">
+                         <i-code cs frag=1>
+                         </i-code>
+                         <i-code cs frag=2 class="fade-in-then-out">
+                           public class Adres
+                           {
+                              public int Id { get; set; }
+                              public string Tekst { get; set; }
+                              public Student Student { get; set; }
+                           }
+                           public class Student
+                           {
+                              public int Id { get; set; }
+                              public Adres Adres { get; set; }
+                              public int AdresId { get; set; }
+                           }
+                         </i-code>
+                         <i-code cs frag=3 class="fade-in-then-out">
+                           public class Adres
+                           {
+                              public int Id { get; set; }
+                              public string Tekst { get; set; }
+                              public int StudentId { get; set; } // hoeft niet
+                              public Student Student { get; set; } // hoeft niet
+                           }
+                           public class Student
+                           {
+                              public int Id { get; set; }
+                              public List&lt;Adres&gt; Adressen { get; set; }
+                           }
+                         </i-code>
+                         <i-code cs frag=4>
+                           public class Adres
+                           {
+                              public int Id { get; set; }
+                              public string Tekst { get; set; }
+                              public int StudentId { get; set; }
+                              public List&lt;StudentAdres&gt; StudentAdressen { get; set; }
+                           }
+                           public class Student
+                           {
+                              public int Id { get; set; }
+                              public List&lt;StudentAdres&gt; StudentAdressen { get; set; }
+                           }
+                           public class StudentAdres
+                           {
+                              public int Id { get; set; }
+                              public int StudentId { get; set; }
+                              public Student Student { get; set; }
+                              public string AdresId { get; set; }
+                              public Adres Adres { get; set; }
+                           }
+                         </i-code>
+                      </div>
+                   </side>
+               </sided>
+            </section>
+            <section h4="Configureren">
+               <p>Soms wil je een andere naam (bijvoorbeeld als er meerdere relaties zijn). </p>
+               <sided>
+                   <side>
+                     Met data-annotaties: 
+                     <i-code cs size=small frag>
+                        public class Post
+                        {
+                            public int PostId { get; set; }
+                            public string Title { get; set; }
+                            public string Content { get; set; }
+                        
+                            public int AuthorUserId { get; set; }
+                            public User Author { get; set; }
+                        
+                            public int ContributorUserId { get; set; }
+                            public User Contributor { get; set; }
+                        }
+                        public class User
+                        {
+                            public string UserId { get; set; }
+                            public string FirstName { get; set; }
+                            public string LastName { get; set; }
+                        
+                            [InverseProperty(&quot;Author&quot;)]
+                            public List&lt;Post&gt; AuthoredPosts { get; set; }
+                        
+                            [InverseProperty(&quot;Contributor&quot;)]
+                            public List&lt;Post&gt; ContributedToPosts { get; set; }
+                        }
+                     </i-code>
+                   </side>
+                   <side>
+                      Met Fluent API:
+                      <i-code cs size=small frag>
+                        class MyContext : DbContext
+                        {
+                           public DbSet&lt;Post&gt; Posts { get; set; }
+                           public DbSet&lt;User&gt; Users { get; set; }
+                           protected override void OnModelCreating(ModelBuilder modelBuilder)
+                           {
+                              modelBuilder.Entity&lt;Post&gt;()
+                                 .HasOne(p =&gt; p.Author)
+                                 .WithMany(u =&gt; u.AuthoredPosts);
+                              modelBuilder.Entity&lt;Post&gt;()
+                                 .HasOne(p =&gt; p.Contributor)
+                                 .WithMany(u =&gt; u.ContributedToPosts);
+                           }
+                        }
+                        public class Post
+                        {
+                           public int PostId { get; set; }
+                           public string Title { get; set; }
+                           public string Content { get; set; }
+                     
+                           public int AuthorUserId { get; set; }
+                           public User Author { get; set; }
+                     
+                           public int ContributorUserId { get; set; }
+                           public User Contributor { get; set; }
+                        }
+                        public class User
+                        {
+                           public string UserId { get; set; }
+                           public string FirstName { get; set; }
+                           public string LastName { get; set; }
+                           public List&lt;Post&gt; AuthoredPosts { get; set; }
+                           public List&lt;Post&gt; ContributedToPosts { get; set; }
+                        }
+                      </i-code>
+                   </side>
+               </sided>
+            </section>
+            <section h4="Loading">
+               <p>Wordt meteen de hele database geladen als er overal relaties zijn? Nee. </p>
+               <i-code cs size=small>
+                  class MyContext : DbContext
+                  {
+                     public DbSet<Post> Posts { get; set; }
+                     public DbSet<User> Users { get; set; }
+                     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+                        optionsBuilder
+                              .UseSqlite(@"Data Source=C:\Users\Pascal\source\repos\ConsoleApp3\database.db");
+                     protected override void OnModelCreating(ModelBuilder modelBuilder)
+                     {
+                        modelBuilder.Entity<Post>()
+                                    .HasOne(p => p.Author)
+                                                         .WithMany(u => u.AuthoredPosts);
+                        modelBuilder.Entity<Post>()
+                                    .HasOne(p => p.Contributor)
+                                                         .WithMany(u => u.ContributedToPosts);
+                     }
+                  }
+                  public class Post
+                  {
+                     public int PostId { get; set; }
+                     public string Title { get; set; }
+                     public string Content { get; set; }
+
+                     public int AuthorUserId { get; set; }
+                     public virtual User Author { get; set; }
+
+                     public int ContributorUserId { get; set; }
+                     virtual public User Contributor { get; set; }
+                  }
+                  public class User
+                  {
+                     public string UserId { get; set; }
+                     public string FirstName { get; set; }
+                     public string LastName { get; set; }
+                     virtual public List<Post> AuthoredPosts { get; set; }
+                     virtual public List<Post> ContributedToPosts { get; set; }
+                  }
+
+                  class Program
+                  {
+                     static void Main(string[] args)
+                     {
+                        using (var mycontext = new MyContext())
+                        {
+                              /*
+                              User u = new User { UserId = "Bob1994", FirstName = "Bob" };
+                              Post p = new Post { Title = "Titel", Author = u };
+                              mycontext.Add(p);
+                              mycontext.SaveChanges();
+                              */
+                              Console.WriteLine(mycontext.Posts.ToList()[0].Author.UserId);
+                        }
+                     }
+                  }
+               </i-code>
+            </section>
+            <section h4="Loading: verschillende soorten">
+               <ul>
+                  <li>
+                     Eager loading: gerelateerde data opgehaald bij initiële query
+                     <i-code cs size=small>
+                        var posts = context.Posts
+                           .Include(post => post.Author)
+                           // .ThenInclude(...)
+                           .ToList();
+                     </i-code>
+                  </li>
+                  <li>
+                     Explicit loading: gerelateerde data expliciet opgehaald op later tijdstip
+                     <i-code cs size=small>
+                        var post = context.Posts
+                           .Single(p => p.PostId == 1);
+                        context.Entry(post)
+                           .Reference(p => p.Author)
+                           // .Collection(...)
+                           .Load();
+                     </i-code>
+                  </li>
+                  <li>
+                     Lazy loading: alles automatisch, kan traag zijn bij opvragen
+                     <ul>
+                        <li frag>Gebruik Microsoft.EntityFrameworkCore.Proxies</li>
+                        <li frag>Roep <i-icode>UseLazyLoadingProxies()</i-icode> aan</li>
+                        <li frag>Gebruik bij alle properties <i-icode cs>virtual</i-icode></li>
+                     </ul>
+                  </li>
+               </ul>
+            </section>
+            <section h2="De opdracht" style="text-align:left">
+               <strong>De opdracht</strong>: <br/>
+               Bij deze opdracht mag je creativiteit gebruiken om iets uit de werkelijkheid te modelleren. Maak eerst een klasse-diagram en vervolgens de bijbehorende C# code (met data-annotaties en de <i-icode>DbContext</i-icode>). Zorg dat <i-icode>Add-Migration</i-icode> en <i-icode>Update-Database</i-icode> werken. 
+               <br/><strong>Eisen</strong>: <br/>
+               <ul>
+                  <li>Maak tenminste &eacute;&eacute;n een-op-een relatie aan. </li>
+                  <li>Maak tenminste &eacute;&eacute;n een-op-veel relatie aan. </li>
+                  <li>Maak tenminste &eacute;&eacute;n veel-op-veel relatie aan. </li>
+                  <li>Gebruik tenminste &eacute;&eacute;n keer overerving. Zie de <a href="https://docs.microsoft.com/en-us/ef/core/modeling/inheritance">docs</a>. </li>
+                  <li>Maak voor tenminste &eacute;&eacute;n configuratie gebruik van de Fluent API, i.p.v. de data-annotaties. </li>
+                  <li>Maak tenminste &eacute;&eacute;n keer zinvol gebruik van een composite sleutel. Maak ook tenminste &eacute;&eacute;n foreign key naar deze sleutel. Zie de <a href="https://docs.microsoft.com/en-us/ef/core/modeling/keys">docs</a>. </li>
+                  <li>Maak tenminste een keer gebruik van [Table]</li>
+                  <li>Maak tenminste een keer gebruik van [Column]</li>
+                  <li>Maak tenminste een keer zinvol gebruik van [StringLength]</li>
+                  <li>Maak tenminste een keer zinvol gebruik van [NotMapped]</li>
+               </ul>
+               <strong>Resultaat</strong>: <br/>
+               Lever het UML diagram en de C# code in een <i-icode>.docx</i-icode> in. 
+            </section>
+        </i-slides>
+    <script src="code/scripts.js"></script>
+</body>
+</html>

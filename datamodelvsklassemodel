@@ -1,0 +1,22 @@
+
+redudantie -> afdwingen OF elimineren
+
+PROBLEEMDOMEIN
+analyse klasse model: pre en post condities
+
+============================
+- ids toevoegen
+- tussentabelen
+- overerving
+- gewenste redudantie (A*->B,B*->C,A*->D,D*->C) [normaliseren]
+- student met telefoonnummer (zwak entiteit, key=studentid+volgnummer)
+- performance
+- extra constraints
+============================
+
+OPLOSSINGSDOMEIN
+- datastructuren
+- navigability
+- detail gedrag veel hoger in ontwerp klasse model
+- [ook] sequentiediagrammen
+- [ook] een statische en dynamische structuur 

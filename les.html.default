@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <title>...</title>
+    <meta name="keywords" content="..." />
+    <meta name="description" content="Les ...">
+</head>
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h3="...">
+                ...
+            </section>
+        </i-slides>
+    </div>
+
+    <script src="code/scripts.js"></script>
+</body>
+</html>

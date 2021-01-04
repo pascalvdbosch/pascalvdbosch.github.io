@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="793.74pt" height="595.26pt" viewBox="0 0 793.74 595.26">
+<g enable-background="new">
+<g id="Layer-1" data-name="P">
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#c0504d" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-488.8221" x="8.9645 18.800782 26.781947 30.434506 34.087068 46.87103 50.52359 55.685235 63.6648 69.23976 72.89232 79.07284">Delimiter //</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-468.84519" x="8.9645 17.48714 26.186003 33.806718 41.786279 49.58642 57.38816 61.16888 69.44802 77.969058 88.588718 97.11136 104.9131 114.74938 125.01019 133.70906 141.5108">CREATE PROCEDURE </tspan></text>
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-468.84519" x="145.40686 149.06743 157.46672 163.6985 171.67807 177.25945 182.5941 190.57367 199.81722 205.39699 210.73165 214.39061 221.11101 229.09058">insert_Artikel</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-448.9323" x="8.964508">(</tspan><tspan y="-428.95539" x="79.64475 83.66577">IN</tspan></text>
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-428.95539" x="104.908298 113.30277 121.28233 130.52268 137.18219 145.64235 154.03684 221.0693 228.08928 235.76287 241.10233 247.87879 256.27809 263.95167 269.53144 273.07185 277.9259 281.57847 289.67817 297.77949 301.43205 306.2861 310.3055">p_Acodevarchar ( 15 ), </tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-408.97846" x="79.644748 83.665767">IN</tspan></text>
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-408.97846" x="104.90829 113.302768 121.28233 129.7425 142.52646 148.76625 155.54592 163.9404 169.51537 173.16793 177.00792 184.26819 187.92075 196.31523 221.0693 228.08928 235.76287 241.10233 247.87879 256.27809 263.95167 269.53144 273.07185 277.9259 281.58488 289.68458 297.7859 305.8856 309.6054 314.45948">p_omschrijvingvarchar ( 100 ),</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-389.00154" x="79.644748 83.665767">IN</tspan></text>
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-389.00154" x="104.90829 113.302768 121.28233 129.67682 135.25179 138.90435 142.74434 221.0693 229.46379 237.44336 244.22303 247.87558 260.65956 268.33955 271.9921 275.41236 280.27284 288.37895 296.48506 300.50608 304.15864 312.26475 315.9173 320.77778 324.7988">p_prijsdecimal (10, 2 ), </tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-369.0246" x="79.644748 83.665767">IN</tspan></text>
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-369.0246" x="104.90829 113.30757 121.28553 129.80496 135.14603 146.60033 154.5783 159.73833 167.41191 172.99167 176.65224 184.51166 221.0693 227.84577 236.24666 243.92024 249.5 253.04042 257.89448 261.54704 269.64674 273.2993">p_Btw_tariefchar ( 1 )</tspan></text>
+</g>
+<g id="Layer-1" data-name="P">
+</g>
+<g id="Layer-1" data-name="P">
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-349.04768" x="8.964508">)</tspan><tspan y="-329.1348" x="8.964508 17.663369 25.28248 35.363866 39.384885">BEGIN</tspan></text>
+</g>
+<g id="Layer-1" data-name="P">
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-309.15788" x="44.30463 48.32565 58.645734 66.02454 73.82629 82.34732 90.14746 93.92658 97.9476 108.267688 115.58723 126.20689 129.81139 139.05013 144.62509 149.96456 153.61711 160.33751 168.31708 171.96964 175.68949 185.72919 194.96953 201.62905 210.0892 218.48369 226.46326 230.48268 234.08399 242.54415 255.32811 261.5679 268.34916 276.74363 282.31858 285.97114 289.81114 297.07139 300.72395 309.1184 316.85926 320.87867 324.35499 332.74946 338.3244 341.97697 345.81697 352.06477 356.08418 359.74473 368.26417 373.60365 385.06437 393.0439 398.20396 405.88554 411.46049 415.11305 422.97407 428.07484">INSERT INTO Artikel (Acode, omschrijving, prijs, Btw_tarief)</tspan><tspan y="-289.18095" x="44.304628 52.585367 61.825704 68.185649 78.444858 86.065578 93.445987 97.28597 100.93853 105.799 114.19348 122.17305 131.41339 138.0729 146.53307 154.92755 162.90712 166.92655 170.52785 178.92234 186.9035 195.36367 208.14763 214.38742 221.16869 229.56317 235.13814 238.7907 242.63069 249.89096 253.54352 261.938 269.67884 273.69825 277.17939 285.57386 293.5534 301.94789 307.52284 311.17539 315.01539 321.2552 325.2762 328.92878 337.32325 345.3028 353.82225 359.1633 370.6224 378.60359 383.7636 391.4436 397.01856 400.6711 408.53053 413.6313 418.49177">VALUES  (p_Acode, p_omschrijving, p_prijs, p_Btw_tarief);</tspan></text>
+</g>
+<g id="Layer-1" data-name="Span">
+</g>
+<g id="Layer-1" data-name="P">
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-269.204" x="8.964504 16.766245 27.08633 36.92261 43.103128">END//</tspan></text>
+</g>
+<g id="Layer-1" data-name="Artifact">
+<text fill="#c0504d" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="16.02" font-family="Calibri"><tspan y="-249.22707" x="8.964504 17.358986 25.338549 28.991108 32.64367 45.42763 49.080194 54.240236 62.2198 67.79476 71.42648">delimiter ;</tspan></text>
+</g>
+<text fill="#8a8a8a" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="13.02" font-family="ArialMT"><tspan y="-23.6371" x="731.5203 738.78549">21</tspan></text>
+<g id="Layer-1" data-name="Figure">
+<clipPath id="cp0">
+<path transform="matrix(1,0,0,-1,0,595.26)" d="M 0 0 L 793.74 0 L 793.74 595.26 L 0 595.26 Z "/>
+</clipPath>
+<g clip-path="url(#cp0)">
+<path transform="matrix(1,0,0,-1,.03,46.590028)" stroke-width="4.5" stroke-linecap="butt" stroke-linejoin="round" fill="none" stroke="#00b0f0" d="M 0 0 L 793.75 0 "/>
+</g>
+<g id="Layer-1" data-name="Artifact">
+</g>
+<clipPath id="cp1">
+<path transform="matrix(1,0,0,-1,0,595.26)" d="M 0 0 L 793.74 0 L 793.74 595.26 L 0 595.26 Z "/>
+</clipPath>
+<g clip-path="url(#cp1)">
+<text fill="#00b0f0" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="36" font-family="Arial" font-weight="bold"><tspan y="-561.3105" x="8.0902 34.071405 54.123407 66.12221 86.17421 108.20621 128.25821 148.31021 168.36222 178.15422 204.13542 224.18743 244.23943 254.25823 276.29023 298.32225 310.32463 320.2246 344.2222 356.22099 378.253 392.2318 412.2838 434.31584 444.277 468.2782 482.25703 504.28904 524.34109 544.39309 566.42507 588.45706 602.4358 622.4878 642.5398 654.5422 664.33419 694.33297 714.38497 738.3861 766.4049">Database Design: Stored Procedures: MySQL</tspan></text>
+</g>
+</g>
+<g id="Layer-1" data-name="P">
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="28.02" font-family="Arial" font-weight="bold"><tspan y="-507.8528" x="8.9636 25.523423 42.624029 59.721834 70.649639 87.74744 103.354579 118.961719 126.76248 151.64145 176.54003 192.14717 201.50585 209.23937 217.03734 237.25658 244.9901 262.0879 277.69505 288.62284 304.22999 329.13136 344.7385 354.09718 369.7043">Voorbeeldmet IN parameter</tspan></text>
+</g>
+<g id="Layer-1" data-name="P">
+</g>
+<g id="Layer-1" data-name="P">
+<text fill="#0070c0" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="24" font-family="Calibri"><tspan y="-203.556" x="7.2 18.480002 30.420004 43.020006 48.540006 61.140008 69.12 81.768009 91.908008 103.84801 116.448009 129.048 137.08802 149.02802 154.548 162.58802 174.408 182.208 194.85599 207.456 215.796 228.39601 240.33602 252.27602 260.616 268.656 274.27204 285.37205 297.31205 309.25205 321.85206 327.30006 344.16007 355.68006 367.20005 375.18006 387.78007 399.72007">Een procedure retourneert geen waarde.</tspan><tspan y="-143.604" x="7.200012 18.480015 30.420016 43.020017 48.540018 61.140016 69.12001 81.76801 91.90801 103.848018 116.44801 129.04802 137.08803 149.02803 154.54802 171.46802 184.11602 192.09603 204.69603 212.73603 218.13602 229.65602 241.17603 253.77603 264.876 276.816 284.79603 297.44404 309.38404 321.98405 333.92405 346.52406 352.04408 371.24409 383.0641 391.1041 396.408 408.348 420.288 432.888 438.40803 451.18803 465.048 475.128 485.20799 492.52799 498.04798 510.64799 519.708 527.748 536.08798 548.6879 558.8279 566.86788 572.3878">Een procedure wordt aangeroepen met een CALL-instructie</tspan></text>
+<text fill="#0070c0" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="19.98" font-family="Calibri"><tspan y="-143.616" x="584.34">:</tspan></text>
+</g>
+<text fill="#77933c" xml:space="preserve" transform="matrix(1 0 -0 1 0 595.26)" font-size="24" font-family="Calibri" font-weight="bold"><tspan y="-88.716" x="42.54 55.260004 69.78 79.908 90.035999 95.364 100.764 106.644 119.544 129.144 141.192 149.712 158.052 169.98001 184.50002 193.02002 201.36002 207.24002 218.10002 230.16243 236.04244 241.56243 249.06243 254.46242 260.03044 274.5504 286.73045 298.91047 311.09049 316.65849 322.82649 328.15449 333.73689 349.3849 360.7129 374.1529 379.61289 390.8329 402.6529 415.55293 427.60093 433.48094 439.04893 445.21693 450.79695 462.97935 475.15937 481.57939 493.7594 505.87944 512.0474 517.26748 522.83547 537.95547 543.52346 549.04348 556.54586">CALL  insert_Artikel ( 'A777', 'USB kabel', 15.25, 'H' );</tspan></text>
+<g id="Layer-1" data-name="Figure">
+<clipPath id="cp2">
+<path transform="matrix(1,0,0,-1,0,595.26)" d="M 0 0 L 793.74 0 L 793.74 595.26 L 0 595.26 Z "/>
+</clipPath>
+<g clip-path="url(#cp2)">
+<path transform="matrix(1,0,0,-1,.03,360.03004)" stroke-width="4.5" stroke-linecap="butt" stroke-linejoin="round" fill="none" stroke="#00b0f0" d="M 0 0 L 793.75 0 "/>
+</g>
+</g>
+</g>
+</svg>

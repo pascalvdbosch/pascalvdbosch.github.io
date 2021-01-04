@@ -1,0 +1,19 @@
+- C-1 Ontwerpen software
+    - De student begrijpt op welke manier software architectuur patronen gebruikt kunnen worden om een webapplicatie te ontwerpen. 
+    - De student weet het verschil tussen een monolitische en een micro-services architectuur; kent de Peer to Peer architectuur en de n-Tier architectuur. 
+    - De student begrijpt wat de karakteristieken en voordelen zijn van domain driven design.
+    - De student kan het http-protocol (incl. statuscodes) lezen en kan benoemen welke risico’s er optreden als gebruik wordt gemaakt van het web.
+    - De student weet op welke manier het ontwerpen van webapplicatie (client server) verschilt van het ontwerpen van een desktop applicatie.
+- C-6 Ontwerpen van Human Computer Interaction
+    - De student begrijpt hoe hij HTML, CSS, JavaScript en een web-framework in kan zetten voor de realisatie van een responsive website.
+- C-8 Ontwerpen van een stelsel van security maatregelen
+    - De student kent en herkent de meest misbruikte soorten kwetsbaarheden in een webapplicatie
+- D-1 Ontwerpen software
+    - De student kent ORM en kan dit succesvol toepassen in een webapplicatie (gebaseerd op Entitiy Framework en Code First voor zowel 1-2-many als voor many-2-many-relaties tussen classes in C#). 
+    - De student begrijpt hoe OO-begrippen en typering van variabelen in C# zijn geïmplementeerd en kan LINQ succesvol inzetten om goede webapplicaties te bouwen.
+    - De student weet wat een Object Result in C# is en kan dit zinvol inzetten om JSON m.b.v. Ajax tussen server en client uit te wisselen.
+- D-2 Testen & Evalueren
+    - De student begrijpt hoe hij zinvolle Unit Tests kan formuleren voor zijn applicatie en kan voor de realisatie van deze Unit Tests gebruik maken van XUnit. 
+    - De student begrijpt hoe kwetsbaarheden met penetration testen blootgelegd kunnen worden. 
+    - De student begrijpt hoe kwaliteitseisen getest worden in een automated testing tool met bijvoorbeeld code metrics. 
+    - De student begrijpt hoe load testen en performance testen gebruikt worden om de schaalbaarheid van het systeem te meten.

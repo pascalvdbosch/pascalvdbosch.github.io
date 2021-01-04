@@ -1,0 +1,9 @@
+
+@import url("revealjs/dist/reset.css");
+@import url("revealjs/dist/reveal.css");
+@import url("revealjs/dist/theme/white.css");
+@import url("revealjs/plugin/highlight/monokai.css");
+@import url("extra.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/eclipse.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css");

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <title>C# &amp; LINQ</title>
+    <meta name="keywords" content="lambda expressies,LINQ,GroupBy,OrderBy,select,parallel,initializers,functioneel,First,LastOrDefault" />
+    <meta name="description" content="Les 5">
+</head>
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="Algemeen">
+                <ul>
+                    <li>Herhaling vorige les</li>
+                    <li frag>Project beoordelingsformulier staat op Blackboard</li>
+                    <li frag>Toets: kijk naar de lesdoelen</li>
+                </ul>
+            </section>
+            <section h2="Meer C#"></section>
+            <section h3="Versiebeheer met Visual Studio (Code)">
+                <ul>
+                    <li>Ook bij code in C# wordt versiebeheer vaak ondergebracht bij GIT</li>
+                    <li frag>GIT is geen GitHub</li>
+                    <li frag>In <img vscode/> wordt GIT wordt standaard ondersteund in de <strong>Team Explorer</strong></li>
+                    <li frag>In <img vs/> wordt GIT wordt standaard ondersteund in de <strong>Source Control</strong></li>
+                    <li frag>Alternatief: GIT via de terminal of via een tool zoals SourceTree</li>
+                    <li frag>Voordeel van geintegreerd GIT gebruik: GIT Ignore goed ingesteld</li>
+                    <li frag>GIT verplicht tijdens project</li>
+                    <li frag>Kies zelf een GIT branching strategie (Git flow, GitHub flow, ...)</li>
+                </ul>
+                <p frag>Literatuur:</p>
+                <ul>
+                    <li frag>Voor <img vs> lees de MSDN <a href="https://docs.microsoft.com/en-us/visualstudio/ide/connect-team-project">hier</a> of <a href="https://docs.microsoft.com/en-us/visualstudio/ide/git-with-visual-studio">hier</a>. </li>
+                    <li frag>Voor <img vscode> lees de docs <a href="https://code.visualstudio.com/docs/editor/versioncontrol">hier</a>. </li>
+                </ul>
+                <i-notes>
+                    <ul>
+                        <li>Github is van Microsoft</li>
+                        <li>Mercurial</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Lambda functies">
+                <ul>
+                    <li>Syntax: <i-icode cs>Func&lt;int, int&gt; func = (int x) =&gt; x + 1;</i-icode></li>
+                    <li frag>Lambda expressies vs <strong>anonieme functies</strong></li>
+                    <li frag>Wat is <strong>functioneel programmeren</strong>?</li>
+                    <li frag><strong>Closures</strong>
+                <div class="r-stack">
+                    <i-code java class="fade-in-then-out" frag>
+                        String tekst = "grote knop";
+                        groteKnop.setOnAction((ActionEvent e) -> 
+                                System.out.println("Je klikte op de " + tekst));
+                        tekst = "kleine knop";
+                        kleineKnop.setOnAction((ActionEvent e) ->
+                                System.out.println("Je klikte op de " + tekst));
+                    </i-code>
+                    <i-code cs frag>
+                        String tekst = "grote knop";
+                        groteKnop.Click += (sender, args) => 
+                                Console.WriteLine("Je klikte op de " + tekst);
+                        tekst = "kleine knop";
+                        kleineKnop.Click += (sender, args) => 
+                                Console.WriteLine("Je klikte op de " + tekst);
+                    </i-code>
+                </div>
+                    </li>
+                    <!-- <li frag>Wat is Continuation-passing style, zie <a href="http://matt.might.net/articles/by-example-continuation-passing-style/">dit</a> en <a href="https://www.youtube.com/watch?v=zB5LTkaJaqk">dit</a>. </li> -->
+                </ul>
+              
+<!-- 
+    https://web.archive.org/web/20130425032733/http://blogs.msdn.com/b/ericlippert/archive/2007/01/10/lambda-expressions-vs-anonymous-methods-part-one.aspx
+    https://web.archive.org/web/20130425032728/http://blogs.msdn.com/b/ericlippert/archive/2007/01/11/lambda-expressions-vs-anonymous-methods-part-two.aspx
+    https://web.archive.org/web/20130425001847/http://blogs.msdn.com/b/ericlippert/archive/2007/01/12/lambda-expressions-vs-anonymous-methods-part-three.aspx
+    https://web.archive.org/web/20130425001816/http://blogs.msdn.com/b/ericlippert/archive/2007/03/26/lambda-expressions-vs-anonymous-methods-part-four.aspx
+    https://web.archive.org/web/20130430053116/http://blogs.msdn.com/b/ericlippert/archive/2007/03/28/lambda-expressions-vs-anonymous-methods-part-five.aspx
+
+    Java 8: march 2014
+
+    closures
+
+    C++ 11: aug 2011
+    C# 2.0: September 2005
+
+    =>
+
+    Javascript ECMAScript 2015: june 2015
+    C# 3.0: August 2007 
+-->
+                    
+            </section>
+            <section h3="Initializers: syntactic sugar">
+                <p>Makkelijk variabelen initialiseren</p>
+                <i-code cs frag>
+                    Student std = new Student()
+                    {
+                        StudentID = 1,
+                        StudentName = "Famke"
+                    };
+                </i-code>
+                <p frag>List-initializers:</p>
+                <i-code frag>
+                    List&lt;int&gt; cijfers = new List&lt;int&gt; { 0, 1, 2, 3 };
+                </i-code>
+                <p frag>Wat gebeurt er nu als je niet alle properties een waarde geeft?</p>
+                <i-notes>Antwoord op de vraag: dan krijgt die property de default waarde. Voor value types (int: 0, decimal: 0.0… etc); voor reference types (String: null, List&lt;T&gt;: null… etc)</i-notes>
+            </section>
+            <section h3="Nullable">
+                <p><a href="http://www.tutorialsteacher.com/csharp/csharp-nullable-types">Literatuur</a></p>
+<ul> 	
+                <li>Hiermee kun je ook <b>value types</b> een waarde <i-icode cs>null</i-icode> toekennen.</li>
+                <li frag>Let op: <i-icode cs>int?</i-icode> is niet hetzelfde type als <i-icode cs>int</i-icode>, maar gedraagt zich bijna gelijk.</li>
+                <li frag><em>Lifed</em> operatoren</li>
+                <li frag><i-icode>A?.B?.Do(C);</i-icode> en <i-icode>A?.B?[C];</i-icode> en <i-icode>??=</i-icode></li>
+                <li frag>
+                    Wat wordt er op het scherm geschreven, als volgende code wordt uitgevoerd?
+                    <i-code cs>
+                        int? i = null;
+                        int j = i ?? 5;
+                        i = j;
+        
+                        Console.WriteLine(i);
+                    </i-code>
+                </li> </ul>
+            </section>
+            <section h3="C#: niet voor toets, wel voor project">
+                <p>Zie de <a href="https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-8">docs</a>. </p>
+                <ul>
+                    <li frag>
+                        Expression bodied members: 
+                        <i-code cs>
+                            public (double Circumference, double Area) Stats => (2, 5);
+                        </i-code>
+                    </li>
+                    <li frag>Pattern matching: 
+                        <i-code cs>
+                        if (input is int count)
+                            sum += count; 
+                        </i-code>
+                    </li>
+                    <li frag><i-icode>using</i-icode></li>
+                    <li frag>Discards: <i-code>var (_, _, _, pop1, _, pop2) = QueryCityDataForYears("New York City", 1960, 2010);</i-code></li>
+                    <li frag>String interpolation: 
+                        <i-code cs>
+                            Console.WriteLine($"|{"Left",-7}|{"Right",7}|");
+                            message = $"The speed of light is {speedOfLight:N3} km/s."; 
+                        </i-code>
+                    </li> 
+            </ul>
+            </section>
+            <section h3="Datastructuren (zie semester 4)">
+                <p>C# kent net als Java ook verschillende datastructuren: </p>
+                <ul>
+                    <li frag>List</li>
+                    <li frag>Queue</li>
+                    <li frag>Stack</li>
+                    <li frag>Dictionary (C# voor HashMap)</li>
+                    <li frag>Etc.</li>
+                </ul>
+                <p frag>Zie <em>algoritmen en datastructuren</em> semester 4...</p>
+            </section>
+            <section h3="Het keyword <i-icode cs>var</i-icode>">
+                Literatuur: lees <a href="http://www.tutorialsteacher.com/csharp/csharp-var-implicit-typed-local-variable">dit</a> en <a href="https://docs.microsoft.com/en-us/dotnet/articles/csharp/programming-guide/classes-and-structs/implicitly-typed-local-variables">dit</a>. 
+                <ul>
+                    <li frag>C# leidt zelf af wat het type is van de variabele op basis van de waarde rechts van de =-operator.</li>
+                    <li frag>
+                        Wat is type inference? Herinner: 
+
+                        <i-code cs>
+                            public void func&lt;T, S&gt;(T arg1, T arg2, S arg3) { }
+                            public void func&lt;T, S&gt;(T arg1, S arg2, S arg3) { }
+                        </i-code>
+                        Bestaat de diamond operator?
+                    </li>
+                    <li frag>Als je het datatype niet correct gebruikt, krijg je dus gewoon een compile-error</li>
+                    <li frag>Omdat de compiler het datatype kent, werkt IntelliSense dus ook gewoon.</li>
+                    <li frag>Is var langzamer?</li>
+                    <li frag>LET OP: Een methode kan geen variabele van het type var teruggeven</li>
+                    <li frag>LET OP: var in C# betekent echt iets anders dan var in JavaScript of PHP</li>
+                </ul>
+            </section>
+            <section h2="LINQ"></section>
+            <section h3="LINQ query syntax">
+                <p>Literatuur: lees <a href="http://www.tutorialsteacher.com/linq/linq-query-syntax">dit</a>. </p>
+                <i-code cs small>
+                    IList&lt;Leerling&gt; leerlingen = new List&lt;Leerling&gt;() {
+                        new Leerling(&quot;Famke&quot;, 5),
+                        new Leerling(&quot;Bill&quot;, 3),
+                        new Leerling(&quot;Pipi&quot;, 3),
+                        new Leerling(&quot;Mohammed&quot;, 4),
+                        new Leerling(&quot;John&quot;, 6)
+                    };
+                    
+                    var query =
+                        from student in leerlingen
+                        where student.groep &gt; 4
+                        select student;
+                </i-code>
+                <ul>
+                    <li frag>Je kunt filteren met Where</li>
+                    <li frag>Je kunt ook alfabetisch sorteren of de lengte van strings bepalen</li>
+                    <li frag>LINQ lijkt qua taal veel op SQL</li>
+                    <li frag>Dan weet je meteen waar de Q van LINQ en SQL voor staat: Query</li>
+                    <li frag>Wees je bewust van de Query-syntax, maar we gebruiken deze niet</li>
+                </ul>
+            </section>
+            <section h3="LINQ methode syntax">
+                <p>Literatuur: lees <a href="http://www.tutorialsteacher.com/linq/linq-method-syntax">dit</a> en <a href="http://www.tutorialsteacher.com/linq/linq-lambda-expression">dit</a>. </p>
+                <ul>
+                    <li frag>Het Where-statement is een normale methode</li>
+                    <li frag><i class="fa fa-exclamation-triangle fa-spin"></i> LET OP <i class="fa fa-exclamation-triangle fa-spin"></i>: alleen beschikbaar na <i-icode cs>using System.Linq</i-icode></li>
+                    <li frag>Het argument is nogal bijzonder: dat noem je een <i-def>lambda-expressie</i-def></li>
+                    <li frag>Een lambda-expressie is niets meer dan een verkorte schrijfwijze voor een (anonymous) method</li>
+                </ul>
+            </section>
+            <section h3="Wat is LINQ">
+                <p>Literatuur: lees <a href="http://www.tutorialsteacher.com/linq/linq-tutorials">dit</a> en <a href="https://channel9.msdn.com/Series/CSharp-Fundamentals-for-Absolute-Beginners/Working-with-LINQ">dit</a></p>
+                <ul>
+                    <li frag>LINQ = Language INtegrated Query</li>
+                    <li frag>Je query-achtige operaties om in C# een query te schrijven</li>
+                    <li frag>De data mag uit verschillende bronnen komen</li>
+                    <ul> 	
+                        <li frag>De data kan worden opgehaald uit een database</li>
+                        <li frag>Maar die data kan ook worden gecombineerd met data uit een Collection</li> 
+                    </ul>
+                    <li frag>Vergelijk LINQ met Java streams</li>
+                    <li frag>LINQ kun je ook gebruiken als je geen gebruik maakt van Entity Framework</li>
+                </ul>
+            </section>
+            <section h3="LINQ methoden">
+                <p>We gebruiken LINQ-methods in semester 3, omdat dit in de praktijk de meest gebruikte syntax is.</p>
+
+                <p frag>Naast de <i-icode>Where</i-icode> zijn er ook andere methodes die veel worden gebruikt:</p>
+                <ul>
+                    <li frag><i-icode>OrderBy</i-icode></li>
+                    <li frag><i-icode>ToList</i-icode></li>
+                    <li frag><i-icode>First(OrDefault)</i-icode>, <i-icode>Last(OrDefault)</i-icode>, <i-icode>ElementAt</i-icode> en Single</li>
+                    <li frag><i-icode>Count</i-icode>, <i-icode>Average</i-icode>, <i-icode>Sum</i-icode>, <i-icode>Max</i-icode> en <i-icode>Min</i-icode></li>
+                    <li frag><i-icode>All</i-icode>, <i-icode>Any</i-icode>, <i-icode>Contains</i-icode></li>
+                    <li frag><i-icode>Select</i-icode></li>
+                </ul>
+            </section>
+            <section h3="LINQ methoden, returntypen en excepties">
+                <p>Wat is een IEnumerable?</p>
+                <p frag>De returntypen van LINQ methoden zijn: </p>
+                <ul>
+                    <li frag>Soms: collectie in collectie uit</li>
+                    <li frag>Soms: collectie in element uit</li>
+                </ul>
+                <p frag>Soms geven methoden een exceptie, soms een <i-icode>null</i-icode></p>
+                <ul>
+                    <li frag>FirstOrDefault: null als leeg</li>
+                    <li frag>First: exceptie als leeg</li>
+                    <li frag>Single: exceptie als niet precies 1</li>
+                </ul>
+            </section>
+            <section h3="LINQ ingewikkelder">
+                <i-code cs> 	
+                    IList&lt;Leerling&gt; leerlingen = new List&lt;Leerling&gt;() {
+                        new Leerling(&quot;Famke&quot;, 5),
+                        new Leerling(&quot;Bill&quot;, 3),
+                        new Leerling(&quot;Pipi&quot;, 3),
+                        new Leerling(&quot;Mohammed&quot;, 4),
+                        new Leerling(&quot;John&quot;, 6)
+                    };
+                    
+                    var query =
+                        from student in leerlingen
+                        let naamlengte = student.naam.Length
+                        group student by (naamlengte, student.groep) into g
+                        where g.Count() &gt; 1
+                        orderby g.Key.naamlengte
+                        select g;
+                </i-code>
+            </section>
+            <section h3="Deferred Execution">
+                Lees <a href="http://www.tutorialsteacher.com/linq/linq-deferred-execution">dit</a>. 
+                <ul>
+                    <li frag>Deferred execution betekent dat de evaluatie van een LINQ-expressive wordt uitgesteld totdat de uitkomst van de evaluatie echt nodig is.</li>
+                    <li frag>Deferred execution levert performance op.</li>
+                    <li frag>Deferred execution levert op dat de evaluatie altijd plaatsvindt op de meest recente data</li>
+                    <li frag>Meestal merk je weinig van deferred execution maar het kan zijn dat in je datasource (vaak de database) tussentijds (buiten jouw programma) iets is veranderd</li>
+                    <li frag>Op basis van deferred execution begrijp je dan waarom er soms meer (of minder) rows voorkomen in de Collection waarop jij je LINQ-methode uitvoert</li>
+                    <li frag>Als je bijv. de methode <i-icode>.ToList()</i-icode> gebruikt in je LINQ-query, dwingt dat <em>wel</em> directe execution af</li>
+                    <li frag>Ook de foreach-lus zorgt dat deferred execution op dat moment wordt uitgevoerd.</li>
+                </ul>
+            </section>
+            <section h3="Deferred Execution: hoe werkt dat?">
+                Demo
+            </section>
+            <section h3="Oefening">
+                <p>Bedenk in 5 minuten: </p>
+                <ul>
+                    <li frag>een klasse met een aantal properties, en </li>
+                    <li frag>in het Nederlands, een query op een lijst van objecten van deze klasse. </li>
+                </ul>
+                <p>Deel dit met je maatje. Programmeer in 5 minuten: de query in LINQ. </p>
+
+                <img src="img/programmers.jpg" alt="Twee programmeurs tegenover elkaar">
+            </section>
+            <section h2="De opdracht">
+                Zie Blackboard
+            </section>
+            <section h2="Vooruitblik"></section>
+        </i-slides>
+    </div>
+    <script src="code/scripts.js"></script>
+</body>
+</html>
+

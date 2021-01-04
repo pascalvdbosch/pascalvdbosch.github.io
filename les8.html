@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="nl">
+
+<head>
+    <meta charset="utf-8">
+    <title>Layout</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="Les 8">
+</head>
+
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="Code hergebruik in de frontend"></section>
+            <section h3="Shared Layout"></section>
+            <section h4="Design van de layout">
+                <p>Een pagina kan er bijvoorbeeld zo uitzien</p>
+                <img src="img/Layout.png" alt="">
+                <p>De header, footer en navigation zijn heel vaak gelijk voor verschillende pagina’s</p>
+            </section>
+            <section h4="Oplossing: Shared Layout file">
+                <p>Oplossing: <strong>Shared Layout</strong> file (<a href="Literatuur: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/layout">MSDN</a>)</p>
+                <ul>
+                    <li frag>
+                        <strong>Footer</strong> en <strong>Header</strong> komen op elke pagina voor (het gemeenschappelijke gedeelte)
+                    </li>
+                    <li frag>
+                        Het contentgedeelte is voor elke URL verschillend
+                    </li>
+                    <li frag>
+                        Anders gezegd: voor elke <em>Action</em> van iedere <em>Controller</em> wordt een andere pagina getoond
+                    </li>
+                    <li frag>
+                        In de <em>View</em> van de <em>Action</em> methode geef je aan welke <em>Shared Layout</em> je wilt gebruiken:
+                        <i-code cshtml>
+                            @{
+                            Layout = "_LayoutSimple";
+                            ViewData ["Title"] = "Index";
+                            }
+                        </i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h4="De Shared Layout file">
+                <i-code cshtml>
+                    &lt;!DOCTYPE html&gt;
+                    &lt;html&gt;
+                    &lt;head&gt;
+                    &lt;meta charset=&quot;utf-8&quot; /&gt;
+                    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+                    &lt;title&gt;@ViewData[&quot;Title&quot;] - WebApplicationCoreEFVoorbeeld&lt;/title&gt;
+                    &lt;/head&gt;
+                    &lt;body&gt;
+                    &lt;div style=&quot;background-color:#0000ff&quot;&gt;
+                    &lt;p&gt;Header: hello Shared Layout&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div&gt;
+                    @RenderBody()
+                    &lt;/div&gt;
+                    &lt;hr /&gt;
+                    &lt;div style=&quot;background-color:#FF0000&quot;&gt;
+                    &lt;p&gt;footer &amp;copy; 2018 - WebApplicationCoreEFVoorbeeld&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;/body&gt;
+                    &lt;/html&gt;
+                </i-code>
+            </section>
+            <section h4="Uitleg Shared Layout">
+                <ul>
+                    <li>
+                        Een <em>Shared Layout</em> moet starten met de regel <i-icode html>&lt;!DOCTYPE html&gt;</i-icode>
+                        <ul>
+                            <li frag>
+                                Dit is bij een normale HTML-file altijd de eerste regels (volgens de HTML-syntax)
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>In de head kun je links naar stylesheets en javascript-bestanden toevoegen</li>
+                    <li frag>De content (die wordt aangemaakt in je <em>View</em>) wordt toegevoegd op de plek van <i-icode cshtml>@RenderBody()</i-icode>
+                    </li>
+                    <li frag>
+                        De <em>Views</em> die je zelf maakt, zijn dus geen zelfstandig HTML document
+                        <ul>
+                            <li frag>
+                                en beginnen dus ook niet met <i-icode html>&lt;!DOCTYPE html&gt;</i-icode>
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Check met F12 de DOM van het uiteindelijke HTML-document
+                        <ul>
+                            <li frag>
+                                Daar zie je dat de HTML in je <em>View</em> is toegevoegd op de plek van <i-icode cshtml>@RenderBody()</i-icode>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h4="<i-icode cs>Viewdata</i-icode> gebruiken in Shared Layout">
+                <ul>
+                    <li>In de <em>Shared Layout</em> kun je <i-icode cs>ViewData</i-icode> gebruiken:
+                        <ul>
+                            <li frag>Bijvoorbeeld om de titel van de pagina in de <em>header</em> te tonen</li>
+                            <li frag>Of om een variabele in de <em>header</em> of in de <em>footer</em> te tonen</li>
+                        </ul>
+                    </li>
+                    <li frag>De je <em>Action</em>-method van de <em>Controller</em> moet je deze <i-icode cs>ViewData</i-icode> dan natuurlijk wel vullen!</li>
+                    <li frag>Het hele idee van een <em>Shared Layout</em> is het voorkomen van dubbele HTML in de diverse <em>Views</em>
+                        <ul>
+                            <li frag>Dubbele HTML-code is namelijk slecht onderhoudbaar omdat elke wijziging op meerdere plekken moet worden doorgevoerd</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Partial Views"></section>
+            <section h4="Partial Views">
+                <p>Ook <strong>Partial Views</strong> (<a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/partial">MSDN</a>) zijn bedoeld om onderhoudbaarheid van de HTML in een View te verbeteren:</p>
+                <ul>
+                    <li frag>Je neemt een deel van je <em>View</em> op in een <em>Partial View</em>
+                        <ul>
+                            <li frag> Dit is een onderdeel van je pagina dat ook op andere pagina’s kan worden hergebruikt</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Op deze manier kun je een grotere View in kleinere stukken opdelen
+                    </li>
+                    <li frag>De <em>Partial View</em> is vooral handig voor HTML die in meerdere <em>Views</em> voorkomt maar niet in alle <em>Views</em>:
+                        <ul>
+                            <li frag> Deze HTML-code kun je dus niet in een <em>Shared Layout</em> plaatsen</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Als je bijvoorbeeld een inlogformulier wilt plaatsen op meerdere pagina’s, dan doe je dat als volgt:
+                        <i-code html>&lt;partial name=&quot;_LoginPartial&quot; /&gt;</i-code>
+                    </li>
+                    <li frag>
+                        Razor zoekt nu naar "_LoginPartial.cshtml" in Views/Shared.
+                    </li>
+                </ul>
+
+            </section>
+            <section h4="Partial View met data">
+                <ul>
+                    <li>Je kunt ook data meegeven aan de <em>Partial View</em></li>
+                    <li frag>Het is sterk aan te bevelen om een <em>Model</em> mee te geven (zo'n <em>Partial View</em> wordt een <strong>Strongly Typed Partial View</strong> genoemd).
+                        <ul>
+                            <li frag>In de View wordt dan compiletime al gecheckt of de Properties van het Model bestaan</li>
+                            <li frag>Je kunt dit bijvoorbeeld gebruiken voor een lijst met nieuwsberichten (bijv.: NOS.nl)
+                                <i-code>
+                                    @foreach (var artikel in @Model) { // @Model is een List&lt;Artikel&gt;
+                                        &lt;partial name=&quot;_Artikel&quot; model=&quot;artikel&quot; /&gt;
+                                    } // alternatief: &lt;partial name=&quot;_Artikel&quot; for=&quot;@artikel&quot; /&gt;
+                                </i-code>
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>Naast een (strongly typed) Model kun je ook gebruik maken van ViewData</li>
+                    <li frag>Ook hiervoor geldt natuurlijk dat de Action het Model of de ViewData moet vullen
+                        <ul>
+                            <li frag>Want: een Partial View heeft geen eigen controller!</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h2="ViewModel">
+            </section>
+            <section h3="Model versus ViewModel">
+                <ul>
+                    <li>
+                        Een <em>Model</em> komt door de <em>ORM</em> in de database terecht. Een <em>ViewModel</em> niet.
+                    </li>
+                    <li frag>
+                        Een <em>Model</em> hoeft geen <em>View</em> te hebben. Een <em>ViewModel</em> wel.
+                        <ul>
+                            <li frag>Een <em>ViewModel</em> heeft geen bestaansrecht zonder de bijbehorende <em>View</em>. </li>
+                        </ul>
+                    </li>
+                    <li frag>Een <em>Model</em> representeert een entiteit in het domeinmodel, dus staat centraal in de webapplicatie. Een <em>ViewModel</em> allebei niet.
+                        <ul>
+                            <li frag>Een <em>Model</em> representeert de toestand van de applicatie met bijbehorende business logica, en kan op veel plekken in de webapplicatie worden gebruikt. </li>
+                            <li frag>Een <em>ViewModel</em> wordt alleen gebruikt om data mee te geven van een <em>Controller</em> naar <em>View</em> (en vanaf daar mogelijk weer verder naar een <em>Partial View</em>).
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag><em>ViewModels</em> staan in een andere map dan de <em>Models</em>: voorkomt verwarring</li>
+                </ul>
+                <p frag>Dit is een architectuur pattern: <strong>Model-View-ViewModel</strong> (<em>MVVM</em>). </p>
+            </section>
+            <section h3="Voorbeelden ViewModel">
+                <p>Voorbeeld 1: <i-icode>Company</i-icode> en <i-icode>Project</i-icode> zijn beide een <em>Model</em>. </p>
+                <i-code cs>
+                    public class ProjectDashboardViewModel
+                    {
+                    public Company Company { get; set; }
+                    public IEnumerable&lt;Project&gt; AllProjects { get; set; }
+                    public int NumberOfFinishedProjects { get; set; }
+                    public IEnumerable&lt;Project&gt; OverdueProjects { get; set; }
+                    }
+                </i-code>
+                <p frag=1>Voorbeeld 2: <i-icode>Student</i-icode> is een <em>Model</em> zonder <i-icode>FullName</i-icode>, met <i-icode>CreatedAt</i-icode>. </p>
+                <i-code cs frag=1>
+                    public class StudentViewModel
+                    {
+                    public string FirstName { get; set; }
+                    public string LastName { get; set; }
+                    public string FullName { get; }
+                    }
+                </i-code>
+                <i-notes>
+                    <ul>
+                        <li>In mijn View wil ik echter gegevens van het bedrijf laten zien en 2 lijsten; één met alle projecten en één met projecten die achterlopen</li>
+                        <li> Ik kan echter maar 1 Model meegeven aan een view</li>
+                        <li> Je kunt dat natuurlijk omzeilen met ViewData[“OverdueProjects”] = … etc.</li>
+                        <li> Maar een ViewModel biedt een strongly typed oplossing die beter is</li>
+                    </ul>
+
+                </i-notes>
+            </section>
+            <section h2="Client-side validatie">
+            </section>
+            <section h3="Herinner: server-side validatie">
+                <sided>
+                    <side>
+                        <i-code cs size=small>
+                            public class Movie
+                            {
+                                public int Id { get; set; }
+        
+                                [StringLength(60, MinimumLength = 3)]
+                                [Required]
+                                public string Title { get; set; }
+        
+                                [Display(Name = &quot;Release Date&quot;)]
+                                [DataType(DataType.Date)]
+                                public DateTime ReleaseDate { get; set; }
+        
+                                [Range(1, 100)]
+                                [DataType(DataType.Currency)]
+                                [Column(TypeName = &quot;decimal(18, 2)&quot;)]
+                                public decimal Price { get; set; }
+        
+                                [RegularExpression(@&quot;^[A-Z]+[a-zA-Z]*$&quot;)]
+                                [Required]
+                                [StringLength(30)]
+                                public string Genre { get; set; }
+        
+                                [RegularExpression(@&quot;^[A-Z]+[a-zA-Z0-9&quot;&quot;&#039;\s-]*$&quot;)]
+                                [StringLength(5)]
+                                [Required]
+                                public string Rating { get; set; }
+                            }
+                        </i-code>
+                    </side>
+                    <side>
+                        <i-code cs size=small>
+                            // GET: Movies/Create
+                            public IActionResult Create()
+                            {
+                                return View();
+                            }
+
+                            // POST: Movies/Create
+                            [HttpPost]
+                            public void IActionResult Create(Movie movie)
+                            {
+                                if (ModelState.IsValid)
+                                {
+                                    _context.Add(movie);
+                                    _context.SaveChanges();
+                                    return RedirectToAction(&quot;Index&quot;);
+                                }
+                                return View(movie);
+                            }
+                        </i-code>
+                    </side>
+                </sided>
+                <p frag style="color:red">Niet alle data-annotaties zijn constraints in de database!</p>
+                <i-notes>Markeer de IsValid</i-notes>
+            </section>
+            <section h3="Twee soorten data-annotaties">
+                <ul>
+                    <li>Bijv. <i-icode cs>[Regex(...)]</i-icode> en <i-icode cs>[StringLength(10)]</i-icode> zijn er alleen voor validatie</li>
+                    <li frag>Bijv. het type van de variabele, <i-icode cs>[Key]</i-icode> en <i-icode cs>[MaxLength(10)]</i-icode> bepalen het database schema [en validatie]</li>
+                    <li frag>(((je kunt ook check constraints toevoegen: <br/> <i-icode cs>modelBuilder.Entity&lt;Student&gt;(s=>s.HasCheckConstraint("constr1", "[Leeftijd] >= 18");</i-icode>)))</li>
+                </ul>
+            </section>
+            <section h3="Het voorbeeld Model">
+                <i-code cs>
+                    public class Student
+                    {
+                        public int Id { get; set; }
+                        [StringLength(10)]
+                        public string Name { get; set; }
+                        [Required]
+                        [Display(Name = "Geboortedatum")]
+                        public DateTime Geboren { get; set; }
+                        [Range(0, 10)]
+                        public double GemiddeldeCijfer { get; set; }
+                    }
+                </i-code>
+            </section>
+            <section h3="Formulier zonder validatie">
+                (zie les 10b)
+                <i-code html>
+                    &lt;form action=&quot;/Students/Create&quot; method=&quot;post&quot;&gt;
+                        &lt;label for=&quot;Name&quot;&gt;Name&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;Name&quot; name=&quot;Name&quot; value=&quot;&quot;&gt;                
+                        &lt;label for=&quot;Geboren&quot;&gt;Geboortedatum&lt;/label&gt;
+                        &lt;input type=&quot;datetime-local&quot; id=&quot;Geboren&quot; name=&quot;Geboren&quot; value=&quot;&quot;&gt;
+                        &lt;label for=&quot;GemiddeldeCijfer&quot;&gt;GemiddeldeCijfer&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;GemiddeldeCijfer&quot; name=&quot;GemiddeldeCijfer&quot; value=&quot;&quot;&gt;
+                        &lt;input type=&quot;submit&quot; value=&quot;Create&quot;&gt;
+                    &lt;/form&gt;
+                </i-code>
+            </section>
+            <section h3="Formulier met validatie">
+                <p>Importeer <strong>jQuery Unobtrusive Validation</strong> (standaard in ASP.NET Core MVC applicatie)</p>
+                <i-code html size=small>
+                    &lt;form action=&quot;/Students/Create&quot; method=&quot;post&quot;&gt;
+                        &lt;label for=&quot;Name&quot;&gt;Name&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; data-val=&quot;true&quot; 
+                            data-val-length=&quot;The field Name must be a string with a maximum length of 10.&quot; 
+                            data-val-length-max=&quot;10&quot; 
+                            id=&quot;Name&quot; maxlength=&quot;10&quot; name=&quot;Name&quot; value=&quot;&quot;&gt;
+                        &lt;span data-valmsg-for=&quot;Name&quot;&gt;&lt;/span&gt;
+
+                        &lt;label for=&quot;Geboren&quot;&gt;Geboortedatum&lt;/label&gt;
+                        &lt;input type=&quot;datetime-local&quot; data-val=&quot;true&quot; 
+                            data-val-required=&quot;The Geboortedatum field is required.&quot; 
+                            id=&quot;Geboren&quot; name=&quot;Geboren&quot; value=&quot;&quot;&gt;
+                        &lt;span data-valmsg-for=&quot;Geboren&quot;&gt;&lt;/span&gt;
+
+                        &lt;label for=&quot;GemiddeldeCijfer&quot;&gt;GemiddeldeCijfer&lt;/label&gt;
+                        &lt;input class=&quot;form-control valid&quot; type=&quot;text&quot; data-val=&quot;true&quot; 
+                            data-val-number=&quot;The field GemiddeldeCijfer must be a number.&quot; 
+                            data-val-range=&quot;The field GemiddeldeCijfer must be between 0 and 10.&quot; data-val-range-max=&quot;10&quot; data-val-range-min=&quot;0&quot; 
+                            data-val-required=&quot;The GemiddeldeCijfer field is required.&quot; 
+                            id=&quot;GemiddeldeCijfer&quot; name=&quot;GemiddeldeCijfer&quot; value=&quot;&quot; aria-describedby=&quot;GemiddeldeCijfer-error&quot; aria-invalid=&quot;false&quot;&gt;
+                        &lt;span data-valmsg-for=&quot;GemiddeldeCijfer&quot;&gt;&lt;/span&gt;
+                        &lt;input type=&quot;submit&quot; value=&quot;Create&quot;&gt;
+                    &lt;/form&gt;
+                </i-code>
+            </section>
+            <section h3="Formulier met validatie met tag helpers">
+                <i-code html>
+                    &lt;form asp-action=&quot;Create&quot;&gt;
+                    &lt;div asp-validation-summary=&quot;ModelOnly&quot;&gt;&lt;/div&gt;
+                    &lt;label asp-for=&quot;Name&quot;&gt;&lt;/label&gt;
+                    &lt;input asp-for=&quot;Name&quot; /&gt;
+                    &lt;span asp-validation-for=&quot;Name&quot;&gt;&lt;/span&gt;
+                    &lt;label asp-for=&quot;Geboren&quot;&gt;&lt;/label&gt;
+                    &lt;input asp-for=&quot;Geboren&quot;/&gt;
+                    &lt;span asp-validation-for=&quot;Geboren&quot;&gt;&lt;/span&gt;
+                    &lt;label asp-for=&quot;GemiddeldeCijfer&quot;&gt;&lt;/label&gt;
+                    &lt;input asp-for=&quot;GemiddeldeCijfer&quot;/&gt;
+                    &lt;span asp-validation-for=&quot;GemiddeldeCijfer&quot;&gt;&lt;/span&gt;
+                    &lt;input type=&quot;submit&quot; value=&quot;Create&quot;/&gt;
+                    &lt;/form&gt; 
+                </i-code>
+            </section>
+            <section h3="Formulier met validatie met tag helpers en opmaak">
+                <i-code html>
+                    &lt;form asp-action=&quot;Create&quot;&gt;
+                        &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger&quot;&gt;&lt;/div&gt;
+                        &lt;div class=&quot;form-group&quot;&gt;
+                            &lt;label asp-for=&quot;Name&quot; class=&quot;control-label&quot;&gt;&lt;/label&gt;
+                            &lt;input asp-for=&quot;Name&quot; class=&quot;form-control&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;Name&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;form-group&quot;&gt;
+                            &lt;label asp-for=&quot;Geboren&quot; class=&quot;control-label&quot;&gt;&lt;/label&gt;
+                            &lt;input asp-for=&quot;Geboren&quot; class=&quot;form-control&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;Geboren&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;form-group&quot;&gt;
+                            &lt;label asp-for=&quot;GemiddeldeCijfer&quot; class=&quot;control-label&quot;&gt;&lt;/label&gt;
+                            &lt;input asp-for=&quot;GemiddeldeCijfer&quot; class=&quot;form-control&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;GemiddeldeCijfer&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;form-group&quot;&gt;
+                            &lt;input type=&quot;submit&quot; value=&quot;Create&quot; class=&quot;btn btn-primary&quot; /&gt;
+                        &lt;/div&gt;
+                    &lt;/form&gt;
+                </i-code>
+            </section>
+            <section h3="Wat zijn Tag Helpers?">
+                <p><a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/working-with-forms">MSDN</a></p>
+                <ul>
+                    <li><strong>Tag Helpers</strong> genereren een stuk HTML-code met allerlei attributen voor je.</li>
+                    <li frag>Het is natuurlijk niet verplicht om <em>Tag Helpers</em> te gebruiken. Je mag de HTML ook uitschrijven</li>
+                    <li frag>Echter: ze besparen je typewerk in je <em>View</em>:
+                        <ul>
+                            <li frag>Het is altijd zinvol om te weten wat ze voor jou doen</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        De <em>Tag Helpers</em> kom je o.a. veel tegen in <em>Views</em> die je via <em>Scaffolding</em> kan maken.
+                        <ul>
+                            <li frag>Sommige <em>Tag Helpers</em> doen veel voor jou, o.a. voor validatie in <em>formulieren</em></li>
+                            <li frag>Andere <em>Tag Helpers</em> doen eigenlijk vrij weinig</li>
+                        </ul>
+                    </li>
+                    <li frag>N.B.: <em>HTML-Helpers</em> zijn een oudere manier om hetzelfde te doen
+                        <ul>
+                            <li frag>Het advies is om de modernere <em>Tag Helpers</em> te gebruiken als je kunt kiezen voor een <em>Tag Helper</em> i.p.v. voor een <em>HTML-Helper</em></li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Client-side validatie">
+                <ul>
+                    <li>Het doel van <strong>validatie</strong> is dat je alleen iets kunt opslaan als alle velden voldoen aan de regels:
+                        <ul>
+                            <li frag>Er moet een geldige datum worden ingevoerd volgens het template dd/mm/jjjj</li>
+                            <li frag>Er mogen alleen letters (en geen cijfers) worden ingevoerd (of andersom)</li>
+                        </ul>
+                    </li>
+                    <li frag>De <em>Tag Helpers</em> maken HTML5-attributen aan voor de <em>validatie</em></li>
+                    <li frag>Zolang je geen goede invoer geeft, wordt na Submit geen <em>HTTP-Post Request</em> uitgevoerd
+                        <ul>
+                            <li frag>Check maar via de F12 in de netwerk tab</li>
+                            <li frag>Deze <em>validatie</em> gebeurt in de browser (<em>client-side validatie</em>)</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        De <em>Tag Helper</em> gebruikt <em>Data Annotaties</em> in de <em>Model</em> klassen voor de validatieregels
+                        <ul>
+                            <li frag>Ook de standaard foutmelding kun je aanpassen m.b.v. deze <em>Data Annotaties</em></li>
+                        </ul>
+                    </li>
+                    <li frag>Waarom is er <em>client-side validatie</em> EN <em>server-side validatie</em>?</li>
+                </ul>
+            </section>
+            <section h2="Scaffolden"></section>
+            <section h3="Wat is code scaffolden?">
+                <ul>
+                    <li>
+                        <strong>Scaffolding</strong> gaan toepassen, dit is:
+                        <ul>
+                            <li frag><em>Formulieren</em> met CRUD functionaliteit laten genereren</li>
+                            <li frag>De <em>Controller</em> met database acties laten genereren</li>
+                            <li frag>De bijbehorende <em>Views</em> worden aangemaakt</li>
+                            <li frag>En dit alles op basis van het <em>Model</em> en je <i-icode>DbContext</i-icode></li>
+                        </ul>
+                    </li>
+                    <li frag>Dit kun je doen voor een tabel maar ook relaties tussen tabellen kun je scaffolden</li>
+                    <li frag>De gegenereerde code moet je kunnen begrijpen</li>
+                    <li frag>Soms wordt er enge code gegenereerd... Wat is <i-icode cs>async</i-icode> en <i-icode cs>await</i-icode>?</li>
+                </ul>
+                <i-notes>Scaffold betekent steiger</i-notes>
+            </section>
+            <section h3="Hoe scaffolden we?">
+                <sided>
+                    <side>
+                        <p>In <img vs/>: </p>
+                        <div class="r-stack">
+                            <img class="zoom fade-in-then-out" frag src="img/screenshot/scaffold1.png" alt="">
+                            <img class="zoom fade-in-then-out" frag src="img/screenshot/scaffold2.png" alt="">
+                            <img class="zoom fade-in-then-out" frag src="img/screenshot/scaffold3.png" alt="">
+                        </div>
+                    </side>
+                    <side>
+                        In <img vscode/>
+                        <i-code size=small>
+                            dotnet tool install -g dotnet-aspnet-codegenerator
+                            dotnet aspnet-codegenerator controller
+                                -name StudentsController 
+                                -m Student 
+                                -dc MijnDbContext
+                                --relativeFolderPath Controllers
+                                --useDefaultLayout
+                        </i-code>
+                    </side>
+                </sided>
+            </section>
+            <section h3="Demo">
+                Probeer iedere letter code begrijpen. 
+            </section>
+            <section h2="Async">
+
+            </section>
+            <section h3="Asynchroon">
+                <svg
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:cc="http://creativecommons.org/ns#"
+                xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                xmlns:svg="http://www.w3.org/2000/svg"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+                width="370.08743mm"
+                height="189.19936mm"
+                viewBox="0 0 370.08743 189.19936"
+                version="1.1"
+                id="svg8"
+                inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+                sodipodi:docname="asynchroon.plain.svg">
+                <defs
+                id="defs2">
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1626"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1624"
+                    inkscape:connector-curvature="0" />
+                </marker>
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1592"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1590"
+                    inkscape:connector-curvature="0" />
+                </marker>
+                <marker
+                    inkscape:stockid="Arrow2Send"
+                    orient="auto"
+                    refY="0"
+                    refX="0"
+                    id="Arrow2Send"
+                    style="overflow:visible"
+                    inkscape:isstock="true"
+                    inkscape:collect="always">
+                <path
+                    id="path1279"
+                    style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    inkscape:connector-curvature="0" />
+                </marker>
+                <circle
+                    id="minMarker"
+                    r="2.2"
+                    cy="87"
+                    cx="0"
+                    style="fill:#000000" />
+                <line
+                    id="hourMarker"
+                    y2="78"
+                    x2="0"
+                    y1="95"
+                    x1="0"
+                    style="stroke:#000000;stroke-width:3.79999995" />
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1626-8"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    inkscape:connector-curvature="0"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1624-6" />
+                </marker>
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1592-2"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    inkscape:connector-curvature="0"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1590-8" />
+                </marker>
+                <marker
+                    inkscape:stockid="Arrow2Send"
+                    orient="auto"
+                    refY="0"
+                    refX="0"
+                    id="Arrow2Send-7"
+                    style="overflow:visible"
+                    inkscape:isstock="true"
+                    inkscape:collect="always">
+                <path
+                    inkscape:connector-curvature="0"
+                    id="path1279-5"
+                    style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)" />
+                </marker>
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1626-8-4"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    inkscape:connector-curvature="0"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1624-6-2" />
+                </marker>
+                <marker
+                    inkscape:isstock="true"
+                    style="overflow:visible"
+                    id="marker1592-2-2"
+                    refX="0"
+                    refY="0"
+                    orient="auto"
+                    inkscape:stockid="Arrow2Send">
+                <path
+                    inkscape:connector-curvature="0"
+                    transform="matrix(-0.3,0,0,-0.3,0.69,0)"
+                    d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+                    style="fill:#aad400;fill-opacity:1;fill-rule:evenodd;stroke:#aad400;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+                    id="path1590-8-9" />
+                </marker>
+                </defs>
+                <sodipodi:namedview
+                id="base"
+                pagecolor="#ffffff"
+                bordercolor="#666666"
+                borderopacity="1.0"
+                inkscape:pageopacity="0.0"
+                inkscape:pageshadow="2"
+                inkscape:zoom="0.98994949"
+                inkscape:cx="587.68656"
+                inkscape:cy="262.19373"
+                inkscape:document-units="mm"
+                inkscape:current-layer="layer1"
+                showgrid="false"
+                inkscape:snap-object-midpoints="true"
+                inkscape:snap-center="true"
+                fit-margin-top="0"
+                fit-margin-left="0"
+                fit-margin-right="0"
+                fit-margin-bottom="0"
+                inkscape:window-width="1920"
+                inkscape:window-height="1147"
+                inkscape:window-x="1042"
+                inkscape:window-y="-8"
+                inkscape:window-maximized="1" />
+                <metadata
+                id="metadata5">
+                <rdf:RDF>
+                <cc:Work
+                    rdf:about="">
+                    <dc:format>image/svg+xml</dc:format>
+                    <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                    <dc:title></dc:title>
+                </cc:Work>
+                </rdf:RDF>
+                </metadata>
+                <g
+                inkscape:label="Layer 1"
+                inkscape:groupmode="layer"
+                id="layer1"
+                transform="translate(149.24982,-38.169673)">
+                <g
+                    id="markerSet"
+                    transform="matrix(0.66145833,0,0,0.66145833,104.13244,132.76935)">
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#hourMarker"
+                    id="use1115" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(6)"
+                    id="use1117" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(12)"
+                    id="use1119" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(18)"
+                    id="use1121" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(24)"
+                    id="use1123" />
+                </g>
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(29.999999,104.13243,132.76936)"
+                    id="use1126" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(60.000001,104.13244,132.76935)"
+                    id="use1128" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(90,104.13244,132.76935)"
+                    id="use1130" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(120,104.13244,132.76935)"
+                    id="use1132" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(150,104.13244,132.76935)"
+                    id="use1134" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(180,104.13244,132.76935)"
+                    id="use1136" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(-150,104.13244,132.76935)"
+                    id="use1138" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(-120,104.13244,132.76935)"
+                    id="use1140" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(-90,104.13244,132.76935)"
+                    id="use1142" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(-60.000001,104.13244,132.76934)"
+                    id="use1144" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet"
+                    transform="rotate(-29.999999,104.13245,132.76935)"
+                    id="use1146" />
+                <circle
+                    style="fill:#000000;stroke:none;stroke-width:0.66145831"
+                    cx="104.13244"
+                    cy="132.76935"
+                    id="circle1152"
+                    r="5.953125" />
+                <g
+                    id="stap4" frag=4
+                    inkscape:label="#g4622">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148"
+                    d="m 162.15391,157.32515 -58.02147,-24.5558"
+                    style="stroke:#ff0000;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    inkscape:connector-curvature="0"
+                    id="path1243"
+                    d="m 104.13243,60.953873 a 71.815475,71.815475 0 0 1 58.24481,29.803522 71.815475,71.815475 0 0 1 9.90146,64.673565"
+                    style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Arrow2Send)" />
+                <text
+                    transform="rotate(55.213418)"
+                    id="text1705"
+                    y="-84.749039"
+                    x="135.73427"
+                    style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        style="font-weight:bold;font-size:10.58333302px;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="-84.749039"
+                        x="135.73427"
+                        id="tspan1703"
+                        sodipodi:role="line">rijst koken</tspan></text>
+                </g>
+                <g
+                    id="stap5" frag=5
+                    inkscape:label="#g4634">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148-6"
+                    d="M 137.27452,79.440646 104.13244,132.76935"
+                    style="stroke:#aad400;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    inkscape:connector-curvature="0"
+                    id="path1565"
+                    d="m 104.13243,86.089287 a 46.680061,46.680061 0 0 1 20.72716,4.854077"
+                    style="fill:none;fill-opacity:1;stroke:#aad400;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker1592)" />
+                <text
+                    transform="rotate(-69.079681)"
+                    id="text1705-1"
+                    y="142.49869"
+                    x="-53.514702"
+                    style="font-style:normal;font-weight:normal;font-size:1.14691758px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        id="tspan1725"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="142.49869"
+                        x="-53.514702"
+                        sodipodi:role="line">snijden</tspan></text>
+                </g>
+                <g
+                    id="stap6" frag=6
+                    inkscape:label="#g4646">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148-6-3"
+                    d="m 165.91785,120.77442 -61.78541,11.99493"
+                    style="stroke:#aad400;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    inkscape:connector-curvature="0"
+                    id="path1565-1"
+                    d="m 130.66199,94.360879 a 46.680061,46.680061 0 0 1 18.2373,25.181371"
+                    style="fill:none;fill-opacity:1;stroke:#aad400;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker1626)" />
+                <text
+                    transform="rotate(-30.900265)"
+                    id="text1705-1-7"
+                    y="169.27197"
+                    x="55.24147"
+                    style="font-style:normal;font-weight:normal;font-size:1.14691758px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        id="tspan1725-4"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="169.27197"
+                        x="55.24147"
+                        sodipodi:role="line">wokken</tspan></text>
+                </g>
+                <g
+                    id="markerSet-4"
+                    transform="matrix(0.66145833,0,0,0.66145833,-51.418425,132.76936)">
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#hourMarker"
+                    id="use1115-2" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(6)"
+                    id="use1117-4" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(12)"
+                    id="use1119-5" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(18)"
+                    id="use1121-4" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#minMarker"
+                    transform="rotate(24)"
+                    id="use1123-8" />
+                </g>
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(29.999999,-51.418434,132.76937)"
+                    id="use1126-8" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(60.000001,-51.418424,132.76936)"
+                    id="use1128-3" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(90,-51.418424,132.76937)"
+                    id="use1130-5" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(120,-51.418424,132.76937)"
+                    id="use1132-8" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(150,-51.418424,132.76937)"
+                    id="use1134-7" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(180,-51.418424,132.76938)"
+                    id="use1136-7" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(-150,-51.418424,132.76936)"
+                    id="use1138-5" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(-120,-51.418424,132.76936)"
+                    id="use1140-8" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(-90,-51.418424,132.76936)"
+                    id="use1142-8" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(-60.000001,-51.418424,132.76935)"
+                    id="use1144-8" />
+                <use
+                    height="100%"
+                    width="100%"
+                    y="0"
+                    x="0"
+                    xlink:href="#markerSet-4"
+                    transform="rotate(-29.999999,-51.418414,132.76938)"
+                    id="use1146-9" />
+                <g
+                    id="stap1" frag=1
+                    inkscape:label="#g4471">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148-9"
+                    d="m 6.603045,157.32516 -58.02147,-24.55579"
+                    style="stroke:#ff0000;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    id="path1243-2"
+                    d="m -51.418435,60.953891 a 71.815476,71.815476 0 0 1 58.24481,29.803522 71.815476,71.815476 0 0 1 9.90146,64.673567"
+                    style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Arrow2Send-7)"
+                    inkscape:connector-curvature="0" />
+                <text
+                    transform="rotate(55.213418)"
+                    id="text1705-6"
+                    y="43.002224"
+                    x="46.989208"
+                    style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        style="font-weight:bold;font-size:10.58333302px;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="43.002224"
+                        x="46.989208"
+                        id="tspan1703-6"
+                        sodipodi:role="line">rijst koken</tspan></text>
+                </g>
+                <g
+                    id="stap2" frag=2
+                    inkscape:label="#g4484">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148-6-5-4"
+                    d="m -17.836685,185.96225 -33.58174,-53.19288"
+                    style="stroke:#aad400;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    sodipodi:nodetypes="cc"
+                    id="path1565-2-8"
+                    d="m 14.332115,161.68454 c -5.10726,11.519 -13.11647,21.74522 -24.96168,27.42946"
+                    style="fill:none;fill-opacity:1;stroke:#aad400;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker1592-2-2)"
+                    inkscape:connector-curvature="0" />
+                <text
+                    transform="rotate(-47.807024)"
+                    id="text1705-1-6-9"
+                    y="133.9304"
+                    x="-127.87251"
+                    style="font-style:normal;font-weight:normal;font-size:1.14691758px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        id="tspan1725-6-7"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="133.9304"
+                        x="-127.87251"
+                        sodipodi:role="line">groente</tspan><tspan
+                        dy="-3"
+                        id="tspan3488"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="148.26688"
+                        x="-127.87251"
+                        sodipodi:role="line">snijden</tspan></text>
+                </g>
+                <g
+                    id="stap3" frag=3
+                    inkscape:label="#g4497">
+                <path
+                    sodipodi:nodetypes="cc"
+                    inkscape:connector-curvature="0"
+                    id="line1148-6-3-9-0"
+                    d="m -69.18289,193.4085 17.764465,-60.63913"
+                    style="stroke:#aad400;stroke-width:1.85208333;stroke-opacity:1" />
+                <path
+                    sodipodi:nodetypes="cc"
+                    id="path1565-1-6-9"
+                    d="m -18.096815,192.80825 c -16.06547,10.05105 -27.92495,9.10268 -46.612382,5.28214"
+                    style="fill:none;fill-opacity:1;stroke:#aad400;stroke-width:2.36500001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker1626-8-4)"
+                    inkscape:connector-curvature="0" />
+                <text
+                    transform="rotate(-7.1091986)"
+                    id="text1705-1-7-1-2"
+                    y="202.24876"
+                    x="-63.66835"
+                    style="font-style:normal;font-weight:normal;font-size:1.14691758px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                    xml:space="preserve"><tspan
+                        dy="3"
+                        id="tspan1725-4-5-9"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="202.24876"
+                        x="-63.66835"
+                        sodipodi:role="line">groente</tspan><tspan
+                        id="tspan3490"
+                        style="font-weight:bold;font-size:11.46917629px;text-align:center;text-anchor:middle;fill:#aad400;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
+                        y="216.58524"
+                        x="-63.66835"
+                        sodipodi:role="line">wokken</tspan></text>
+                </g>
+                <circle
+                    style="fill:#000000;stroke:none;stroke-width:0.66145831"
+                    cx="-51.418427"
+                    cy="132.76935"
+                    id="circle1152-3"
+                    r="5.953125" />
+                </g>
+                </svg>
+                <ul>
+                    <li frag>de term <i-def>asynchroon</i-def> is misschien tegenintuitief (<a href="https://english.stackexchange.com/a/261951/164245">dit</a> helpt)</li>
+                    <li frag>meerdere CPU kernen / meerdere threads (hyperthreading)</li>
+                    <li frag>Bijvoorbeeld: de spellingchecker runt parallel in Word</li>
+                </ul>
+            </section>
+            <section h3="Waar kom je async tegen?">
+                <ul>
+                    <li>SaveChangesAsync</li>
+                    <li>ToListAsync</li>
+                    <li>async Task&lt;IActionResult&gt;</li>
+                </ul>
+            </section>
+            <section h3="Voorbeeld 1">
+                <i-code cs> 	
+                    public static async Task methode(int arg) {
+                        Console.WriteLine("'methode' begint");
+                        var wacht = Task.Delay(1000);
+                        Console.WriteLine("'wacht' begonnen");
+                        await wacht;
+                        Console.WriteLine("'wacht' klaar");
+                        Console.WriteLine("'methode' klaar");
+                    }
+                    public static async Task Main(string[] args)
+                    {
+                        Console.WriteLine("'main' begint");
+                        var taak = methode(2);
+                        Console.WriteLine("'main' verder");
+                        await taak;
+                        Console.WriteLine("'main' klaar");
+                        Console.ReadLine();
+                    }
+                 </i-code>
+            </section>
+            <section h3="Voorbeeld 2">
+                <a href="les8demo.cs">code</a>
+            </section>
+            <section h3="Async is ingewikkeld">
+                <ul>
+                    <li>Hoe werken excepties?</li>
+                    <li>Locks? Deadlocks?</li>
+                    <li>Moet alles async worden?</li>
+                </ul>
+            </section>
+            <section h2="Opdracht">
+                <ul>
+                    <li>Maak een model klasse Student met een Id, 6 properties en een extra property "List&lt;Student&gt; Vrienden". </li>
+                    <li>Voor elk van de 6 properties: voeg een data-attribute toe waarop gevalideerd kan worden client-side. </li>
+                    <li>Scaffold de controller en views voor de CRUD operaties. Sla de studenten op in een SQLite database (of eventueel SQL Server). </li>
+                    <li>Zorg dat er client-side en server-side validatie is. </li>
+                    <li>In de footer van alle webpagina’s wil ik 3 studenten zien die voldoen aan een zelf gekozen criterium (bijv. studenten met het hoogste cijfer). Maak in je Shared View gebruik van een Partial View. Aan de Partial View geef je een IEnumerable van maximaal 3 items mee. Hint: gebruik de LINQ method Take (3).</li>
+                </ul>
+                <ul>
+                    <li>Zorg dat je van alle gescaffolde code begrijpt wat het betekent. </li>
+                    <li>Bestudeer de gegeneerde HTML van het formulier met Tag Helpers. </li>
+                </ul>
+            </section>
+            <section h2="Overig: ViewData versus ViewBag">
+                <ul>
+                    <li>
+                        <i-icode cs>ViewData</i-icode> is een Dictionary Object (die je kunt lezen en schrijven)
+                    </li>
+                    <li frag>
+                        <i-icode cs>ViewBag</i-icode> is een Wrapper die verwijst naar <i-icode cs>ViewData</i-icode> (NB ViewBag zelf kun je dus geen waarde geven) <ul>
+                            <li frag>Het is een heel bijzonder object dat dynamisch eigen properties aanmaakt</li>
+                            <li frag>Omdat <i-icode cs>ViewBag</i-icode> een wrapper is om <i-icode cs>ViewData</i-icode> heen, verwijzen ze naar dezelfde content:</li>
+                            <li frag>
+                                <i-icode cs>ViewData["Message"] = "text";</i-icode> vs. <i-icode cs>ViewBag.Message = "text";</i-icode>
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>Weet je nog? Als je objecten in <i-icode cs>ViewData</i-icode> stopt, moet je casten om de waarde te kunnen lezen
+                        <ul>
+                            <li frag>Dat is bij <i-icode cs>ViewBag</i-icode> niet meer nodig (<i-icode cs>ViewBag</i-icode> organiseert dit zelf)
+                                <ul>
+                                    <li frag>
+                                        <i-icode cs>Student s = (Student) ViewData["BesteStudent"];</i-icode>
+                                    </li>
+                                    <li frag>
+                                        <i-icode cs>Student s = ViewBag.BesteStudent;</i-icode>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+        </i-slides>
+        <script src="code/scripts.js"></script>
+</body>
+
+</html>

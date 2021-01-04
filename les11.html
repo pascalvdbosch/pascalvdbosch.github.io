@@ -1,0 +1,577 @@
+<!-- https://owasp.org/
+https://www.ssllabs.com/ssltest/analyze.html?d=www.hhs.nl&hideResults=on
+https://securityheaders.com/?q=hhs.nl&followRedirects=on
+https://letsencrypt.org/getting-started/ -->
+
+<!doctype html>
+<html lang="nl">
+
+<head>
+    <meta charset="utf-8">
+    <title>Web API, JSON en Ajax</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="Les 11">
+</head>
+
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="Ajax">
+                <i-notes>
+                    <ul>
+                        <li>Verwarring rond de toets: de toets gaat door</li>
+                        <li>Vragen naar aanleiding van het gastcollege gisteren?</li>
+                        <li>Wie weet al wat AJAX is?</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Het probleem">
+                <p>We versturen/ontvangen alleen nog data bij het: </p>
+                <ul>
+                    <li frag>klikken op links, of het</li>
+                    <li frag>versturen van een formulier</li>
+                </ul>
+                <p frag>dus er moet een nieuwe (mogelijk dezelfde) pagina worden geladen</p>
+                <img src="img/clientserver.svg">
+                <i-notes>
+                    Dynamische content
+                </i-notes>
+            </section>
+            <section h3="Het probleem: voorbeelden">
+                <ul>
+                    <li>Wat gebeurt er als je op een like knop klikt?</li>
+                    <li frag>Hoe ontvangt een chat-applicatie live de comments?</li>
+                    <li frag>Hoe werkt autocompletion bij zoeken?</li>
+                    <li frag><em>Single page applications</em> (SPA)</li>
+                    <li frag><del>Hoe laden we plaatjes <em>lazy</em>?</del></li>
+                </ul>
+                <p frag>Vanuit Javascript asynchroon HTTP requests doen = <em>AJAX</em></p>
+                <i-notes>
+                    <ul>
+                        <li>Ajax was vroeger een buzzword</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Herinerring: asynchroon programmeren in C#">
+                <p>In <a href="https://wpfw.imfast.io/les8.html#/31">les 8</a> hebben we dit laten liggen. </p>
+                <p frag>Nu: vier voorbeelden</p>
+                <i-notes>
+                    waarom? ((A))jax
+                </i-notes>
+            </section>
+            <section h4="1) Een moeilijke berekening">
+                <i-code cs size=small> 	
+                    static long Optellen(long a, long b) {
+                        for (long i = 0; i &lt; b; i++)
+                            a ++;
+                        return a;
+                    }
+                    static void MoeilijkeBerekening() {
+                        Console.WriteLine(Optellen(100, 1000000));
+                    }
+                </i-code>
+                <ul>
+                    <li frag>
+                        In de Main: twee keer <i-icode>MoeilijkeBerekening();</i-icode>
+                        <ul>
+                            <li frag>Lang wachten... (DateTime.Now.Ticks)</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        In de Main: twee keer <i-icode>Task.Run(MoeilijkeBerekening);</i-icode>
+                        <ul>
+                            <li frag>❓ Programma sluit meteen af?</li>
+                            <li frag>💡 De taken worden wel gestart, maar er wordt niet gewacht!</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        In de Main: 
+                        <i-code cs size=small>
+                            var a = Task.Run(MoeilijkeBerekening);
+                            var b = Task.Run(MoeilijkeBerekening);
+                            await a;
+                            await b;
+                        </i-code>
+                        <ul>
+                            <li frag>❓ The type or namespace name 'await' could not be found?</li>
+                            <li frag>💡 Gebruik <i-icode>async</i-icode> en return <i-icode>Task</i-icode>!</li>
+                        </ul>
+                    </li>
+                </ul>
+                <i-notes>
+                    <ul>
+                        <li>Wat als b klaar is voordat a klaar is?</li>
+                        <li>Gebruik nooit async void</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h4="2) Ze gaan echt tegelijk!">
+                <i-code cs> 	
+                    static void Printen(string letter)
+                    {
+                        for (long i = 0; i &lt; 10000; i++)
+                            Console.Write(letter);
+                    }
+                    static async Task Main(string[] args)
+                    {
+                        var a = Task.Run(() =&gt; Printen(&quot;.&quot;));
+                        var b = Task.Run(() =&gt; Printen(&quot;x&quot;));
+                        await a;
+                        await b;
+                    }
+                 </i-code>
+            </section>
+            <section h4="3) Iets returneren">
+                <i-code cs>
+                    static async Task&lt;string&gt; MySQLLaden() {
+                        await Task.Delay(2000);
+                        return &quot;MySQL is geladen&quot;;
+                    }
+                    static async Task&lt;string&gt; SQLServerLaden() {
+                        await Task.Delay(2000);
+                        return &quot;SQL Server is geladen&quot;;
+                    }
+                    static async Task Main(string[] args) {
+                        Task&lt;string&gt; a = MySQLLaden();
+                        Task&lt;string&gt; b = SQLServerLaden();
+                        Console.WriteLine(await a + &quot; en &quot; + await b);
+                    }
+                </i-code>
+            </section>
+            <section h4="4) Ingewikkelder voorbeeld">
+                <i-code cs size=small>
+                    static async Task&lt;string&gt; MySQLLaden() {
+                        await Task.Delay(2000);
+                        return &quot;MySQL is geladen&quot;;
+                    }
+                    static async Task&lt;string&gt; SQLServerLaden() {
+                        await Task.Delay(2000);
+                        return &quot;SQL Server is geladen&quot;;
+                    }
+                    static async Task&lt;string&gt; DatabasesLaden()
+                    {
+                        Task&lt;string&gt; a = MySQLLaden();
+                        Task&lt;string&gt; b = SQLServerLaden();
+                        return await a + &quot; en &quot; + await b;
+                    }
+                    static async Task&lt;string&gt; AndereDingenLaden() {
+                        await Task.Delay(2000);
+                        return &quot;Andere dingen zijn geladen&quot;;
+                    }
+                    static async Task&lt;string&gt; Laden() {
+                        Task&lt;string&gt; a = DatabasesLaden();
+                        Task&lt;string&gt; b = AndereDingenLaden();
+                        return await a + &quot;\n&quot; + await b;
+                    }
+                </i-code>
+            </section>
+            <section h4="Waar komen we async nu tegen?">
+                <p>2 nieuwe keywords: </p>
+                <ul>
+                    <li><i-icode>async</i-icode> bij de declaratie van de methode: 
+                        <i-code cs>
+                            public async Task&lt;IActionResult&gt; Index() { ... }
+                        </i-code>
+                    </li>
+                    <li><i-icode>await</i-icode>
+                        <ul>
+                            <li frag>
+                                Bij het opslaan in EF Core<i-code cs>await _context.SaveChangesAsync();</i-code></li>
+                            <li frag>
+                                Bij het ophalen uit EF Core
+                                <i-code cs>return View(await _context.ToetsResultaat.ToListAsync());</i-code>
+                            </li>
+                            <li frag>
+                                Bij het toevoegen van een rol
+                                <i-code cs>await _userManager.AddToRoleAsync(user, Input.Rol);</i-code>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="AJAX">
+                <p>Twee manieren: </p>
+                <ol>
+                    <li>
+                        De XMLHttpRequest (XHR): event-listeners (oud) of JQuery.ajax
+                        <i-code js size=small>
+                            var http = new XMLHttpRequest();
+                            http.open(&#039;POST&#039;, &#039;meldingen/zoek&#039;, true);
+                            http.setRequestHeader(&#039;Content-type&#039;, &#039;application/x-www-form-urlencoded&#039;);
+                            http.onreadystatechange = function() {
+                                if(http.readyState == 4 &amp;&amp; http.status == 200) {
+                                    alert(http.responseText);
+                                }
+                            }
+                            http.onerror = function {
+                                alert.log("Fout bij het zoeken!");
+                            }
+                            http.send(&#039;term=stoeptegel&#039;);
+                        </i-code>
+                    </li>
+                    <li frag>
+                        De fetch: m.b.v. javascript Promises (nieuw)
+                        <i-code js>
+                            fetch("meldingen/zoek", {
+                                method: "POST", 
+                                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                                body: "term=stoeptegel"})
+                            .then(r => {
+                                if (r.status == 200)
+                                    throw new Error("Fout");
+                                return r.text();
+                            })
+                            .then(r => alert.log(r))
+                        </i-code>
+                    </li>
+                </ol>
+                <i-notes>
+                    <ul>
+                        <li>Hoe komen we ook al weer aan JQuery?</li>
+                        <li>Chainen! I.p.v. wat?</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="JS promises">
+                <p>Oud: </p>
+                <i-code js>
+                    fetch('/movies')
+                        .then((response) => response.json())
+                        .then((movies) => console.log(movies)); 
+                </i-code>
+                <p frag>Nieuw: </p>
+                <i-code js frag>
+                    const response = await fetch('/movies');
+                    const movies = await response.json();
+                    console.log(movies); 
+                </i-code>
+                <i-notes>
+                    <ul>
+                        <li>De methode JSON returneert ook een promise, omdat die wacht tot de hele body geladen is. </li>
+                        <li>ContinueWith</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="Wat is de HTTP response?">
+                <p>Wordt bepaald door de <i-icode>Content-Type</i-icode>. Voorbeelden: </p>
+                <ul>
+                    <li>
+                        JSON (JavaScript Object Notation)
+                        <i-code json size=small>
+                            {
+                                &quot;naam&quot;: &quot;John&quot;,
+                                &quot;leeft&quot;: true,
+                                &quot;leeftijd&quot;: 27,
+                                &quot;adres&quot;: {
+                                  &quot;stad&quot;: &quot;Amsterdam&quot;,
+                                  &quot;land&quot;: &quot;Nederland&quot;
+                                },
+                                &quot;telefoonnummers&quot;: [
+                                  {
+                                    &quot;type&quot;: &quot;thuis&quot;,
+                                    &quot;number&quot;: &quot;212 555-1234&quot;
+                                  },
+                                  {
+                                    &quot;type&quot;: &quot;werk&quot;,
+                                    &quot;number&quot;: &quot;646 555-4567&quot;
+                                  }
+                                ]
+                            }
+                        </i-code>
+                    </li>
+                    <li frag>
+                        XML
+                        <i-code xml size=small> 	
+                            &lt;root&gt;
+                                &lt;naam&gt;John&lt;/naam&gt;
+                                &lt;leeft&gt;true&lt;/leeft&gt;
+                                &lt;leeftijd&gt;27&lt;/leeftijd&gt;
+                                &lt;adres&gt;
+                                    &lt;land&gt;Nederland&lt;/land&gt;
+                                    &lt;stad&gt;Amsterdam&lt;/stad&gt;
+                                &lt;/adres&gt;
+                                &lt;telefoonnummers&gt;
+                                    &lt;telefoonnummer&gt;
+                                        &lt;number&gt;212 555-1234&lt;/number&gt;
+                                        &lt;type&gt;thuis&lt;/type&gt;
+                                    &lt;/telefoonnummer&gt;
+                                    &lt;telefoonnummer&gt;
+                                        &lt;number&gt;646 555-4567&lt;/number&gt;
+                                        &lt;type&gt;werk&lt;/type&gt;
+                                    &lt;/telefoonnummer&gt;
+                                &lt;/telefoonnummers&gt;
+                            &lt;/root&gt;
+                        </i-code>
+                    </li>
+                </ul>
+                <i-notes>
+                    Oneindige lus?
+                    HTML kan ook!
+                </i-notes>
+            </section>
+            <section h3="Korte vraag">
+                <i-code>
+                    new List&lt;Student&gt;()
+                    {
+                        new Student()
+                        {
+                            StudentID = 1,
+                            StudentNaam = &quot;Bob&quot;
+                        }
+                    }
+                </i-code>
+                <p>Hoe wordt deze lijst als JSON verstuurd?</p>
+                <ul>
+                    <li><i-icode>[{"studentID","studentNaam"}:{1,"Bob"}]</i-icode></li>
+                    <li><i-icode>[{1,"Bob"}]</i-icode></li>
+                    <li><i-icode>["studentID":1,"studentNaam":"Bob"]</i-icode></li>
+                    <li><i-icode>[{"studentID":1,"studentNaam":"Bob"}]</i-icode></li>
+                </ul>
+            </section>
+            <section h3="C# en JSON">
+                <ul>
+                    <li>
+                        ❓ Hoe sturen we JSON (ipv HTML) naar JS vanuit C#?
+                        <ul>
+                            <li frag>💡 Return <i-icode>JsonResult</i-icode> en gebruik <i-icode>Json</i-icode></li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        ❓ Hoe sturen we JSON (ipv HTML) naar C# vanuit JS?
+                        <ul>
+                            <li frag>💡 Importeer <i-icode>Microsoft.AspNetCore.Mvc.NewtonsoftJson</i-icode> en gebruik <i-icode>.AddNewtonsoftJson()</i-icode> en <i-icode>[FromBody]</i-icode></li>
+                        </ul>
+                    </li>
+                    <li frag>Uittesten met Postman! Waarom?</li>
+                </ul>
+                <p frag>In de Controller: </p>
+                <i-code cs frag>
+                    [HttpPost]
+                    public JsonResult Like([FromBody] LikeInfo extra)
+                    {
+                        return Json(new LikeInfo { Aantal = 12 + extra.Aantal });
+                    }
+                </i-code>
+                <p frag>In de View: </p>
+                <i-code js frag>
+                    &lt;script&gt;
+                        fetch(&quot;/Home/Like&quot;).then(r =&gt; r.json()).then(r =&gt; console.log(r.aantal));
+                    &lt;/script&gt;
+                </i-code>
+            </section>
+            <section h3="C# en JSON: returnen">
+                <ul>
+                    <li>
+                        Een specifiek formaat:
+                        <ul>
+                            <li frag>
+                                JSON: <i-icode>Content-Type=application/json; charset=utf-8</i-icode>
+                                <i-code cs>
+                                    [HttpPost]
+                                    public JsonResult Like([FromBody] LikeInfo extra) {
+                                        return Json(new LikeInfo { Aantal = 12 + extra.Aantal });
+                                    }
+                                </i-code>
+                            </li>
+                            <li frag>
+                                Tekst: <i-icode>Content-Type=text/plain</i-icode>
+                                <i-code cs>
+                                    public ContentResult Melding() { return Content("Hallo!"); }
+                                </i-code>
+                            </li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Content negotiation: de Accept-header wordt bekeken. 
+                        <i-code cs>services.AddControllers(options =&gt; options.RespectBrowserAcceptHeader = true)</i-code>
+                        Gebruik ObjectResult: 
+                        <i-code>
+                            public ActionResult Auteurs() { return Ok(_auteurs.List()); }
+                        </i-code>
+                        Of: 
+                        <i-code>
+                            public Auteur EenAuteur() { return _auteurs.First(); }
+                        </i-code>
+                    </li>
+                </ul>
+
+
+                
+                <p frag>Je kan ook direct LikeInfo returneren of een ActionResult</p>
+                <i-notes>
+                    Een list returneren kan ook!
+                </i-notes>
+
+            </section>
+            <section h2="API">
+                <ul>
+                    <li>
+                        Wat is een API?
+                        <ul>
+                            <li>Application Programming Interface</li>
+                        </ul>
+                        Vaak wordt JSON gereturneerd. 
+                    </li>
+                    <li frag>
+                        Wanneer heeft je website een API nodig? Bijvoorbeeld als
+                        <ul>
+                            <li>je (mogelijk in de toekomst) meerdere frontends wilt hebben (mobiele app?)</li>
+                            <li>je de data ook voor derde partijen (makkelijk) beschikbaar wilt stellen</li>
+                        </ul>
+                    </li>
+                    <li frag>
+                        Zelf kan je ook API's gebruiken (open data)
+                    </li>
+                    <li frag>
+                        Een GET hoort niets aan te passen
+                    </li>
+                    <li frag>
+                        Een API documenteren: bijvoorbeeld met <a href="https://app.swaggerhub.com/apis/apivanpascal/TestApi/1.0.0#free">Swaggerhub</a>
+                    </li>
+                </ul>
+                <i-notes>
+                    In principe kan een derde partij altijd, via HTML, bij de data
+                </i-notes>
+            </section>
+            <section h3="Nieuw overzicht met een Web API">
+                <img width="100%"  src="img/apisetup2.svg">
+                <i-notes>
+                    <ul>
+                        <li>Erbij tekenen</li>
+                        <li>CORS is belanglijk</li>
+                    </ul>
+                </i-notes>
+            </section>
+            <section h3="ApiController">
+                <p>Scaffolden!</p>
+                <ul>
+                    <li frag>De startup is veel eenvoudiger: er is geen view meer</li>
+                </ul>
+                <p frag>Het [ApiController] attribuut zorgt voor model validatie, [FromBody], etc.</p>
+            </section>
+            <section h3="Authorize">
+                <ul>
+                    <li>
+                        Demo, daarna controleer met Postman, dan zend de Cookie mee
+                    </li>
+                    <li>
+                        Kan ook: JWT tokens i.p.v. Cookies
+                    </li>
+                </ul>
+            </section>
+            <section h3="Routen">
+                <p>Routing is in het bijzonder belangrijk bij API's. </p>
+                <p frag>Bijvoorbeeld bij het nesten van resources: </p>
+                <i-code frag>company/{companyid}/department/{departmentid}/employees</i-code>
+                <ul>
+                    <li frag>
+                        Conventional routing: 
+                        <i-code>
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapControllerRoute(name: "blog",
+                                            pattern: "blog/{*article}",
+                                            defaults: new { controller = "Blog", action = "Article" });
+                                endpoints.MapControllerRoute(name: "default",
+                                            pattern: "{controller=Home}/{action=Index}/{id?}");
+                            });
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Attribute routing, bijvoorbeeld: 
+                        <i-code>
+                            [Route("api/toets/[controller]/[action]")]
+                        </i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h2="Uitgebreid voorbeeldje">
+            </section>
+            <section h3="Uitgebreid voorbeeldje: controller">
+                <i-code cs>
+                    [HttpGet]
+                    public ObjectResult GetStudenten ()
+                    {
+                        var studenten = _context.Student.Select(st =&gt; new { Id = st.Id, Naam = st.Naam });
+                        return new ObjectResult (studenten);
+                    }
+
+                    [HttpGet(&quot;{id}&quot;)]
+                    public ObjectResult GetStudent(int id)
+                    {
+                        var student = _context.Student.Find(id);
+                        var item = new { naam = student.Naam, leeftijd = student.Leeftijd };
+                        return new ObjectResult(item);
+                    }
+                </i-code>
+            </section>
+            <section h3="Uitgebreid voorbeeldje: view, form">
+                <i-notes>
+                    Wat valt er hier op?
+                </i-notes>
+                <i-code html>
+                    &lt;form name=&quot;Studenten&quot; method=&quot;post&quot; action=&quot;JavaScript: getStudent();&quot;&gt;
+
+                        &lt;div id=&quot;studs&quot;&gt;&lt;/div&gt;
+                        &lt;div id=&quot;errorMelding&quot;&gt;&lt;/div&gt;
+                        &lt;br /&gt;
+                        &lt;select name=&quot;studentID&quot; id=&quot;studentID&quot; 
+                                onchange=&quot;JavaScript: jQuery(&#039;form&#039;).submit();&quot; /&gt;
+                        &lt;input type=&quot;button&quot; id=&quot;getButton&quot; value=&quot;Haal studenten op“
+                               onclick=&quot;getStudenten ();&quot; /&gt;
+                    &lt;/form&gt;
+                </i-code>
+                <p>Voeg ook de JS toe: <i-icode>@section Scripts { &lt;script type=&quot;text/javascript&quot; src=&quot;~/js/student.js&quot;&gt;&lt;/script&gt; }</i-icode>
+                </p>
+            </section>
+            <section h3="Uitgebreid voorbeeldje: view, JS, 1">
+                <i-code js>
+                    function getStudenten () {
+                        jQuery.ajax({ 
+                            type: &#039;GET&#039;, url: &#039;/api/Studenten/&#039;, dataType: &#039;json&#039;,
+                            success: function (data) {
+                                jQuery.each(data, function (index, element) {
+                                    jQuery(&#039;#studentID&#039;).append(jQuery(&#039;&lt;option&gt;&#039;, { 
+                                        value: element.id, text: element.naam
+                                    }));
+                                });
+                            },
+                            error: function (XMLHttpReq, status, errorThrown) {
+                                jQuery(&#039;#errorMelding&#039;).html(errorThrown);
+                            }
+                        });
+                    }
+                </i-code>
+            </section>
+            <section h3="Uitgebreid voorbeeldje: view, JS, 2">
+                <i-code js>
+                    function getStudent () {
+                        jQuery.ajax({
+                            type: &#039;GET&#039;,
+                            url: &#039;/api/Studenten/&#039; + jQuery(&#039;#studentID&#039;).val(),
+                            dataType: &#039;json&#039;,
+                            success: function (data) {
+                                jQuery(&#039;#studs&#039;).append(jQuery(&#039;&lt;div&gt;&#039;, {
+                                    text: data.naam + &quot;(&quot; + data.leeftijd + &quot; jaar)&quot;
+                                }));
+                            },
+                            error: function (XMLHttpReq, status, errorThrown) {
+                                jQuery(&#039;#errorMelding&#039;).html(errorThrown);
+                            }
+                        });
+                    }
+                </i-code>
+            </section>
+            <section h2="Opdracht">
+                <ul>
+                    <li>Maak een modelklasse Student met de properties StudentId, Naam en Leeftijd. </li>
+                    <li>Scaffold een API Controller</li>
+                    <li>We willen nu 1 pagina waarop we studenten kunnen toevoegen, aanpassen, en verwijderen. (we maken dus een soort single page application voor dit gedeelte van de website)</li>
+                    <li>Zorg dat na het toevoegen van een student, de lijst wordt vervest (niet de hele pagina!)</li>
+                </ul>
+            </section>
+        </i-slides>
+        <script src="code/scripts.js"></script>
+</body>
+
+</html>

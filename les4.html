@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="nl">
+
+<head>
+    <meta charset="utf-8">
+    <title>MVC</title>
+    <meta name="keywords" content="model,view,controller,PRG,Razor,cshtml,action,HTTP,formulieren,post,get,CRUD,viewdata,redirect,routinglogica,statisch" />
+    <meta name="description" content="Les 4">
+</head>
+
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="Hoe maak je een website in ASP.NET MVC?"></section>
+            <!-- <section h3="Web frameworks">
+                andere web frameworks
+                verschillen ASP.NET en ASP.NET Core, platformonafhankelijkheid, etc.
+            </section> -->
+            <section h3="Kijk uit met googlen">
+                Versienamen zijn erg onduidelijk: uitleg
+                <a href="https://stackoverflow.com/questions/51390971/im-lost-what-happened-to-asp-net-mvc-5">hier</a> en 
+                <a href="https://stackoverflow.com/questions/38109524/what-is-the-difference-between-asp-net-mvc-6-and-asp-net-core-1-0-and-the-reason">hier</a>. 
+            </section>
+            <section h3="Demo: een project aanmaken">
+                <sided>
+                    <side>
+                        <h3>Visual Studio</h3>
+                        <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/start-mvc">MSDN</a>
+                        <ul>
+                            <li frag=0>
+                                Selecteer de juiste <i>project-template</i>
+                            </li>
+                            <li frag=1>
+                                Geef het project een eigen naam
+                            </li>
+                            <li frag=2>
+                                Let op! <b>Kies ASP.NET Core 3.1</b>
+                                Let op: kies voor no authentication
+                            </li>
+                        </ul>
+                        <div class="r-stack">
+                            <img class="zoom" frag=0 data-src="img/screenshot/WebApp.PNG" style="width:100%" />
+                            <img class="zoom" frag=1 data-src="img/screenshot/WebApp1.PNG" style="width:100%" />
+                            <img class="zoom" frag=2 data-src="img/screenshot/WebApp2.PNG" style="width:100%" />
+                        </div>
+                    </side>
+                    <side>
+                        <h3>VS Code</h3>
+                        <i-code powershell>
+                            > dotnet new webapp -n "MyWebApp"
+                        </i-code>
+                    </side>
+                </sided>
+            </section>
+            <section h3="Demo: runnen">
+                <ul>
+                    <li>Als je het project runt, dan krijg je een website te zien in de browser. </li>
+                    <li frag>De website heeft een contact- en een about-pagina.</li>
+                    <li frag>Wat gebeurt er allemaal achter de schermen?</li>
+                    <li frag>Wat wordt er geinstalleerd in VS Code om te kunnen runnen?</li>
+                </ul>
+            </section>
+            <section h2="De controller">
+                <i-notes>
+                    Uitspraak: contrOller of controller?
+                </i-notes>
+            </section>
+            <section h3="Zelf proberen: controller toevoegen">
+                <ul>
+                    <li><a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/adding-controller?view=aspnetcore-2.1">Literatuur</a></li>
+                    <li>Voeg de HelloWorldController toe zoals beschreven</li>
+                    <ul>
+                        <li>NB: Jouwproject heeft minder mappen dan op het screenshot (er is bijvoorbeeld nog geen Models-map)</li>
+                    </ul>
+                    <li>Run het project en probeer ook eens de volgende pagina’s op te vragen:</li>
+                    <ul>
+                        <li>http://localhost:8080/helloworld (8080 is een voorbeeld, dit kan je aanpassen in de configuratie van IIS)</li>
+                        <li>http://localhost:8080/helloworld/Index</li>
+                        <li>http://localhost:8080/helloworld/Welcome</li>
+                    </ul>
+                </ul>
+            </section>
+            <section>
+                <i-notes>
+                    <ul>
+                        <li>De figuur toont de rol van browser, webserver en ASP.NET</li>
+                        <li> Als een gebruiker een pagina opvraagt, wordt er een dynamische webpaginagegenereerd</li>
+                        <li> http://www.webshop.nl/Product?id</li>
+                        <li>De response bestaat vaak uit HTML die de webserver naar de browser stuurt</li>
+                    </ul>
+                </i-notes>
+                <svg viewBox="0 0 756 255" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" overflow="visible">
+                    <rect x="30" y="30" width="120" height="150" style="fill: rgb(216, 216, 216);" />
+                    <text x="90" y="105" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Browser</text>
+                    <rect frag=0 width="180" height="210" style="fill: none; stroke: rgb(0, 0, 0); stroke-dasharray: 4px;" />
+                    <rect frag=6 width="350" height="210" style="fill: none; stroke: rgb(0, 0, 0); stroke-dasharray: 4px;" x="400" />
+                    <text frag=0 x="90" y="230" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Clientside</text>
+                    <text frag=6 style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="230" x="575">Server side</text>
+
+                    <text frag=1 x="290" y="230" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;">Internet</text>
+
+                    <rect frag=2 x="430" y="30" width="150" height="150" style="fill: rgb(216, 216, 216);" />
+                    <rect frag=3 x="445" y="45" width="120" height="62.338" style="fill: rgb(177, 177, 177);" />
+                    <text frag=3 transform="matrix(1, 0, 0, 1, 465, -70)" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="134.103" x="38.747">ASP.NET<tspan x="38.74700164794922" dy="1em">​</tspan>MVC</text>
+                    <text frag=2 x="249.366" y="175" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" transform="matrix(1, 0, 0, 1, 255, -47.822254)">Webserver<tspan x="249.36599731445312" dy="1em">​</tspan>(IIS)</text>
+
+                    <path frag=1 d="M 150 55 H 390 L 390 39.396 L 430 59.396 L 390 79.396 L 390 64.396 H 150 V 55 Z" style="fill: rgb(216, 216, 216);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041" />
+                    <path frag=5 d="M -430 -158.396 H -190 L -190 -173.396 L -150 -153.396 L -190 -133.396 L -190 -148.396 H -430 V -158.396 Z" style="fill: rgb(216, 216, 216);" transform="matrix(-1, 0, 0, -1, 0, 0)" bx:shape="arrow -405.197 -173.396 249.352 40 10 48.437 0 1@a7d7115b" />
+
+                    <rect frag=4 x="600" y="45" width="120" height="62.338" style="fill: rgb(177, 177, 177);" />
+                    <text frag=4 style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px; text-anchor: middle; dominant-baseline: central;" y="75" x="660">Database</text>
+                    <text frag=5 x="290" y="150" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px;text-anchor: middle; dominant-baseline: central;">HTTP Response</text>
+                    <text frag=1 x="290" y="60" style="white-space: pre; fill: rgb(51, 51, 51); font-size: 28px;text-anchor: middle; dominant-baseline: central;">HTTP Request</text>
+
+                    <path frag=4 d="M 565 55 H 580 L 580 50 L 600 60 L 580 70 L 580 64.396 H 565 V 55 Z" style="fill: rgb(177, 177, 177);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041" />
+                    <path frag=4 d="M 600 85 H 580 L 580 80 L 565 90 L 580 100 L 580 95 H 600 V 85 Z" style="fill: rgb(177, 177, 177);" bx:shape="arrow 150 39.396 249.352 40 10 48.437 0 1@105b2041" />
+                </svg>
+            </section>
+            <section h3="Herhaling: HTTP(S) = HyperText Transfer Protocol (Secure)">
+                <ul>
+                    <li>Dit protocol maakt WWW (= World Wide Web) mogelijk</li>
+                    <li frag>In de syntax van dit protocol ligt vast hoe berichten over het Internet worden geformatteerd en verstuurd.</li>
+                    <li frag>Wanneer men over het Internet surft:</li>
+                    <ul>
+                        <li frag>worden er HTTP-requests verstuurd van een browser naar een Webserver</li>
+                        <li frag>Deze berichten zijn van het type GET, POST, HEAD, PUT, DELETE, TRACE, CONNECT of PATCH</li>
+                        <li frag>Webservers handelen deze requests af en retourneren een HTTP-response</li>
+                    </ul>
+                    <li frag>HTTP is een stateless protocol.</li>
+                </ul>
+            </section>
+            <section h2="Models, Views en Controllers" name=mvc>
+                <sided>
+                    <side>
+                        <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" id="svg8" version="1.1" viewBox="0 0 100.61436 53.814236" width="100%">
+                            <!-- <g transform="scale(2)"> -->
+                            <defs id="defs2" />
+                            <g transform="translate(-13.229166,-226.38037)" id="layer1">
+                                <rect frag=1 ry="0.056335915" y="228.20833" x="47.625" height="10.58333" width="31.75" id="rect4531" style="fill:#00aeef;fill-opacity:1;stroke:#008000;stroke-width:0.01;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                                <rect frag=4 ry="0.05633593" y="257.3125" x="47.625" height="10.583334" width="31.75" id="rect4531-5" style="fill:#00aeef;fill-opacity:1;stroke:#008000;stroke-width:0.01;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                                <text frag=1 id="text4550" y="235.26768" x="52.628654" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#ffffff;stroke-width:0.26458332" y="235.26768" x="52.628654" id="tspan4548">Controller</tspan>
+                                </text>
+                                <text frag=4 id="text4550-8" y="264.3429" x="58.194553" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.05833328px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#ffffff;stroke-width:0.26458332" y="264.3429" x="58.194553" id="tspan4548-8">View</tspan>
+                                </text>
+                                <path id="path4570" d="m 13.229166,230.85417 h 21.166666 v -2.64583 l 5.291667,5.29166 -5.291667,5.29167 v -2.64583 H 13.229166 Z" style="fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                                <text id="text4550-9" y="235.01317" x="15.188663" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#ffffff;stroke-width:0.26458332" y="235.01317" x="15.188663" id="tspan4548-4">Request</tspan>
+                                </text>
+                                <path frag=6 id="path4570-6" d="M 39.687499,259.95833 H 18.520833 v -2.64583 l -5.291667,5.29166 5.291667,5.29167 V 265.25 h 21.166666 z" style="fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                                <text frag=6 id="text4550-9-6" y="263.92834" x="16.752834" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#ffffff;stroke-width:0.26458332" y="263.92834" x="16.752834" id="tspan4548-4-0">Response</tspan>
+                                </text>
+                                <path frag=3 id="path4570-3" d="m 65.352081,238.79167 v 14.81666 h 1.852081 L 63.5,257.3125 59.795831,253.60833 h 1.852081 v -14.81666 z" style="fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                                <g frag=3 style="stroke-width:18.32122231" transform="matrix(0.05458152,0,0,0.05458152,49.184147,232.37203)" id="g4711">
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:18.32122612px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 579.95703,965.01562 v 210.00588 c 0.11906,59.3207 43.57268,105.0039 105.00391,105.0039 h 630.01956 c 63.0706,-1.9962 106.879,-52.9478 105.0039,-105.0039 V 965.01562 h -321.7246 a 100.71429,100.71429 0 0 1 -98.83597,81.57228 100.71429,100.71429 0 0 1 -98.79492,-81.57228 z" transform="scale(0.26458333)" id="path4651" />
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:18.32122612px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 684.99023,702.50586 c -61.43119,0 -104.88485,45.6832 -105.0039,105.00391 v 105.0039 h 324.47656 c 14.21289,-40.19195 52.19134,-67.08172 94.82227,-67.13672 42.63734,0.0476 80.62484,26.9387 94.83984,67.13672 h 325.8887 v -105.0039 c 1.8751,-52.05612 -41.9333,-103.00768 -105.0039,-105.00391 z" transform="scale(0.26458333)" id="path4651-2" />
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:4.84748983px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 217.71428,187.00893 c 0,-9.95337 0,-19.90675 0,-29.86012 33.00992,0 66.01985,0 99.02977,0 v 29.86012 h -8.69346 V 165.464 h -82.39881 v 21.54493" id="path4672" />
+                                </g>
+                                <g frag=6 style="stroke-width:2.2980957" transform="matrix(0.43514287,0,0,0.43514287,-29.63031,168.44066)" id="g4741">
+                                    <rect style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4713" width="24.321527" height="16.102989" x="124.35416" y="185.875" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4715" width="18.520834" height="2.6458333" x="127" y="188.52084" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02297358;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4717" width="7.9375" height="1.7717648" x="127" y="193.8125" ry="0.04715623" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4719" width="7.9375" height="5.2916665" x="137.58333" y="193.8125" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02297358;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4717-6" width="7.9375" height="1.7717649" x="127" y="197.33241" ry="0.04715623" />
+                                </g>
+                                <text frag=2 id="text4550-2" y="229.97601" x="85.944107" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#00aeef;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#00aeef;fill-opacity:1;stroke-width:0.26458332" y="229.97601" x="85.944107" id="tspan4548-2">Controller</tspan>
+                                </text>
+                                <text frag=4 id="text4550-2-0" y="259.05124" x="92.311852" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#00aeef;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#00aeef;fill-opacity:1;stroke-width:0.26458332" y="259.05124" x="92.311852" id="tspan4548-2-9">View</tspan>
+                                </text>
+                                <text frag=3 id="text4550-2-1" y="248.46791" x="72.230736" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#00aeef;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;fill:#00aeef;fill-opacity:1;stroke-width:0.26458332" y="248.46791" x="72.230736" id="tspan4548-2-3">Model</tspan>
+                                </text>
+                                <text frag=2 id="text4550-0" y="234.79176" x="97.83313" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;text-align:center;text-anchor:middle;fill:#5f5f5f;fill-opacity:1;stroke-width:0.26458332" y="234.79176" x="97.83313" id="tspan4548-7">haalt Model op</tspan>
+                                    <tspan id="tspan4805" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;text-align:center;text-anchor:middle;fill:#5f5f5f;fill-opacity:1;stroke-width:0.26458332" y="240.97737" x="97.83313">&quot;<tspan id="tspan4807" style="font-style:italic;text-align:center;text-anchor:middle">doet</tspan> iets&quot;</tspan>
+                                </text>
+                                <text frag=4 id="text4550-0-1" y="263.90195" x="97.718582" style="font-style:normal;font-weight:normal;font-size:1.05833328px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+                                    <tspan id="tspan4805-7" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;text-align:center;text-anchor:middle;fill:#5f5f5f;fill-opacity:1;stroke-width:0.26458332" y="263.90195" x="97.718582">Representeert</tspan>
+                                    <tspan id="tspan4835" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:arial;-inkscape-font-specification:arial;text-align:center;text-anchor:middle;fill:#5f5f5f;fill-opacity:1;stroke-width:0.26458332" y="270.07556" x="97.718582">Model visueel</tspan>
+                                </text>
+                                <g frag=5 style="stroke-width:2.2980957" transform="matrix(0.43514288,0,0,0.43514288,14.679831,192.30532)" id="g4741-9">
+                                    <rect style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4713-2" width="24.321527" height="16.102989" x="124.35416" y="185.875" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4715-6" width="18.520834" height="2.6458333" x="127" y="188.52084" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02297358;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4717-9" width="7.9375" height="1.7717648" x="127" y="193.8125" ry="0.04715623" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02298096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4719-0" width="7.9375" height="5.2916665" x="137.58333" y="193.8125" ry="0.070419908" />
+                                    <rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.02297358;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" id="rect4717-6-9" width="7.9375" height="1.7717649" x="127" y="197.33241" ry="0.04715623" />
+                                </g>
+                                <g frag=5 style="stroke-width:26.79722404" transform="matrix(0.0373173,0,0,0.0373173,41.898773,267.24066)" id="g4711-4">
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:26.79722977px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 579.95703,965.01562 v 210.00588 c 0.11906,59.3207 43.57268,105.0039 105.00391,105.0039 h 630.01956 c 63.0706,-1.9962 106.879,-52.9478 105.0039,-105.0039 V 965.01562 h -321.7246 a 100.71429,100.71429 0 0 1 -98.83597,81.57228 100.71429,100.71429 0 0 1 -98.79492,-81.57228 z" transform="scale(0.26458333)" id="path4651-0" />
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:26.79722977px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 684.99023,702.50586 c -61.43119,0 -104.88485,45.6832 -105.0039,105.00391 v 105.0039 h 324.47656 c 14.21289,-40.19195 52.19134,-67.08172 94.82227,-67.13672 42.63734,0.0476 80.62484,26.9387 94.83984,67.13672 h 325.8887 v -105.0039 c 1.8751,-52.05612 -41.9333,-103.00768 -105.0039,-105.00391 z" transform="scale(0.26458333)" id="path4651-2-6" />
+                                    <path style="fill:#8cc600;fill-opacity:1;stroke:none;stroke-width:7.09009838px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 217.71428,187.00893 c 0,-9.95337 0,-19.90675 0,-29.86012 33.00992,0 66.01985,0 99.02977,0 v 29.86012 h -8.69346 V 165.464 h -82.39881 v 21.54493" id="path4672-6" />
+                                </g>
+                                <path frag=5 id="path4570-6-6" d="m 57.679166,275.6997 h 8.092489 v -0.88194 l 2.023122,1.76388 -2.023122,1.76389 v -0.88194 h -8.092489 z" style="fill:#5f5f5f;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+                            </g>
+                        </svg>
+                    </side>
+                    <side>
+                        <ul>
+                            <li frag=1>
+                                Controller ontvangt Request en haalt data op
+                            </li>
+                            <li frag=3>
+                                Controller geeft dit Model door aan de View
+                            </li>
+                            <li frag=4>
+                                View zet het model om naar dynamische HTML
+                            </li>
+                            <li frag=6>
+                                Deze HTML wordt in de Response terug gegeven aan de gebruiker
+                            </li>
+                        </ul>
+                    </side>
+                    <i-notes>
+                        <ul>
+                            <li>Students will learn more about Entity Framework and data access in Module 2.</li>
+                            <li> Students will learn more about the ASP.NET Routing Engine in Module 7.</li>
+                        </ul>
+                    </i-notes>
+                </sided>
+
+            </section>
+            <section h3="Toelichting MVC">
+                <ul>
+                    <li>Het HTTP-request komt van de browser bij de controller</li>
+                    <li>
+                        <ul>
+                            <li frag>Hoe gaat dit precies?</li>
+                        </ul>
+                    </li>
+                    <li frag>De controller geeft nog geen View terug</li>
+                    <li>
+                        <ul>
+                            <li frag>View vormt model om tot een HTML-pagina</li>
+                            <li frag>Voorlopig hebben we nog geen View en geven we alleen een string terug</li>
+                        </ul>
+                    </li>
+                    <li frag>De controller gebruikt ook nog geen Model-classes</li>
+                </ul>
+            </section>
+            <section h3="URL-routinglogica (1)">
+                <p>URL wordt vertaald naar welke action method in welke controller wordt aangeroepen.</p>
+                <ul>
+                    <li frag>http://localhost:&lt;poortnummer&gt;/[Controller]/[ActionName]/[Parameters]</li>
+                    <li frag>Het eerst deel is de naam van de Controller (standaard: Home) </li>
+                    <li frag>Het tweede deel is de naam van de Action method (standaard: Index)</li>
+                    <li frag>Het derde deel zijn parameters (later hierover meer)</li>
+                </ul>
+            </section>
+            <section h3="URL-routinglogica (2)">
+                <ul>
+                    <li>Wat gebeurt er als er een typefout staat in:</li>
+                    <li>
+                        <ul>
+                            <li frag>de naam van de Controller?</li>
+                            <li frag>de naam van de Action Method?</li>
+                        </ul>
+                    </li>
+                    <li frag>Ik zie een lege pagina (bij mij in Chrome)</li>
+                    <li>
+                        <ul>
+                            <li frag>Maar na F12 zie ik in de netwerk-tab een 404-error</li>
+                        </ul>
+                    </li>
+                    <li frag>En wat gebeurt er als je een Action Method private maakt?</li>
+                    <li frag>Of wat gebeurt er bij de toevoeging van de volgende annotatie?
+                        <i-code cs>
+                            [HttpPost]
+                            public string Index() {
+                            return "This is my default action...";
+                            }
+                        </i-code>
+                    </li>
+                    <li frag>En wat gebeurt er tenslotte als ik de de annotatie [HttpGet] gebruik? </li>
+                </ul>
+            </section>
+            <section h3="De controller doet iets">
+                Hoe kun je met een Controller bijvoorbeeld de tijd laten zien?
+                <i-code cs>
+                    public string DeTijd()
+                    {
+                    DateTime t = DateTime.Now;
+                    String message = string.Format("De tijd is {0} uur en {1} minuten", t.Hour, t.Minute);
+                    return message;
+                    }
+                </i-code>
+                Nu heb ik een echte dynamische pagina!
+            </section>
+            <section h3="Parameters">
+                Nu geven we een parameter mee: http://localhost:xxxxx/helloworld/welcome/?naam=jan
+                <i-code cs>
+                    public string Welcome(string naam)
+                    {
+                    DateTime t = DateTime.Now; string message;
+
+                    if (t.Hour&lt;12)
+                    message = string.Format("Goedemorgen {0}", naam);
+                    else
+                    message = string.Format("Goedemiddag {0}", naam);
+
+                    return message;
+                    }
+                </i-code>
+                Door de parameter is de pagina dynamisch geworden
+            </section>
+            <section h3="Breakpoints">
+                Als je wilt weten hoe de applicatie werkt, kunt een breakpoint in de code plaatsen
+            </section>
+            <section h3="Oefenen">
+                <h4>Oefening 1:</h4>
+                Maak een Action Method optellen
+                <ul>
+                    <li>Deze heeft 2 parameters: getal1 en getal2</li>
+                    <li> Uitvoer: 3 + 4 = 7 (natuurlijk afhankelijk van de waardes voor getal1 en getal2)</li>
+                </ul>
+
+                <h4>Oefening 2:</h4>
+                <p>Maak een Action Method delen</p>
+                <ul>
+                    <li>Deze heeft 2 parameters: getal1 en getal2</li>
+                    <li> Uitvoer: 12 / 4 = 3</li>
+                    <li> LET OP: wat gebeurt er als je deelt door 0?</li>
+                </ul>
+            </section>
+            <section h3="Parameter id">
+                <a href="https://exceptionnotfound.net/asp-net-core-demystified-routing-in-mvc/">Literatuur</a>
+                <ul>
+                    <li>
+                        Url: http://localhost:xxxxx/helloworld/persoon/1 (volgens routinglogica is 1 er een parameter) komt terecht bij:
+                        <i-code cs>
+                            public string Persoon(int id)
+                            {
+                            List<string> namenLijst = new List<string> { "Jan", "Klaas", "Wim", "Alexander" };
+                                    string message = string.Format("Persoon {0} op de lijst heet {1}",
+                                    id, namenLijst.ElementAt(id));
+                                    return message;
+                                    }
+                        </i-code>
+                    </li>
+                    <li>
+                        Deze routing werkt alleen als template van MapRoute in Startup.cs is gedefinieerd als:
+                        <i-code>template: "{controller=<x>}/{action=<y>}/{id?}"</i-code>
+                    </li>
+                    <li>
+                        De parameter-definitie geldt voor de hele applicatie. Wil je dat parameter als naam wordt genomen?
+                        <i-code>template: "{controller=<x>}/{action=<y>}/{naam?}"</i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h3="URL-routinglogica (3)">
+                <ul>
+                    <li>Wat gebeurt er als je een parameter vergeet mee te geven in de URL?</li>
+                    <li frag>check ook wat er gebeurt als je een string meegeeft i.p.v. een integer</li>
+                    <li frag>Wat gebeurt er als je 5 of -1 als id meegeeft?</li>
+                    <li frag>Wat gebeurt er als je een Action Method overload?</li>
+                    <li frag>Oh ja: een methode met dezelfde naam, maar met verschillende parameters.</li>
+                    <li frag>Probeer er eens één met parameter te definiëren en één zonder parameter</li>
+                    <li frag>Probeer nu eens een teller bij te houden die aangeeft hoe vaak de pagina is opgevraagd</li>
+                    <li frag>Definieer een member variabele teller in de controller class. Lukt dat?</li>
+                </ul>
+            </section>
+            <section h3="Statische bestanden">
+                <ul>
+                    <li>Statische bestanden (zoals plaatjes of stylesheet-bestanden) kun je plaatsen in de map wwwroot</li>
+                    <li frag> De routinglogica snapt dat deze bestanden hier staan</li>
+                    <li frag> Inclusief het path van een url</li>
+                    <li frag> Wat gebeurt er als je een plaatje in de Controller-map plaatst?</li>
+                    <li frag> En wat gebeurt er als je een controller in de wwwroot-map plaatst?</li>
+                </ul>
+            </section>
+            <section h2="De view en de model"></section>
+            <section h3="Toevoegen View">
+                <p>Zie de <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/adding-view?view=aspnetcore-2.1">MSDN</a>.</p>`
+                <ul>
+                    <li>We voegen een View toe aan Index action methode van HelloWorld</li>
+                    <ul>
+                        <li frag> Let op: screenshots wijken af van wat er gebeurt in jouw nieuwste versie van Visual Studio</li>
+                    </ul>
+                    <li frag> Run</li>
+                    <li frag> Resultaat:</li>
+                    <ul>
+                        <li frag> Links boven in de pagina staat de tekst van de net gemaakte view</li>
+                        <li frag> Bovenin zie je de zwarte balk met oa Home, About en Contact</li>
+                        <li frag> Onderin een copyright</li>
+                        <li frag> De titel in het tabblad is gezet met Index</li>
+                    </ul>
+                    <li frag> Toevoegen <i-icode cshtml>@{ Layout = ""; }</i-icode>
+                    </li>
+                    <li frag> Dan wordt View niet in een shared layout file geplaatst </li>
+                </ul>
+            </section>
+            <section h3="Razor">
+                Zie de <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-2.1">MSDN</a>.
+                <ul>
+                    <li frag>In een View staat zowel HTML-code als C# code</li>
+                    <li frag> Hoe snapt de compiler wat HTML is en wat C#?</li>
+                    <li frag> Basis regel:</li>
+                    <ul>
+                        <li frag> Alles is HTML</li>
+                        <li frag> Tenzij er een <i-icode cshtml>@</i-icode> voor staat</li>
+                        <li frag> Maar bij de eerstvolgende <b>overbodige</b> spatie of Enter na de <i-icode cshtml>@</i-icode> wordt code geïnterpreteerd als HTML</li>
+                        <li frag> Met <i-icode cshtml>@{ ... }</i-icode> kun je meerdere C#-regels groeperen</li>
+                    </ul>
+                    <li frag> <b>In een View staat zo weinig mogelijk C#-code</b></li>
+                    <li frag> Dat hoort bij nette code volgens MVC</li>
+                </ul>
+            </section>
+            <section h3="Voorbeeld huidige tijd">
+                <i-code cshtml>
+                    @{
+                    Layout = "";
+                    ViewData["Title"] = "Index";
+                    DateTime huidigeTijd = DateTime.Now;
+                    }
+
+                    &lt;p&gt;Het is nu @huidigeTijd.Hour : @huidigeTijd.Minute : @huidigeTijd.Second&lt;/p&gt; </i-code>
+
+                Wat is de dubbele punt: HTML of C#?
+            </section>
+            <section h3="De rol van de Controller t.o.v. van de View ">
+                <ul>
+                    <li>De Controller bepaalt wat je ziet in een View</li>
+                    <li frag>Dit is een afspraak die hoort bij de keuze voor MVC</li>
+                    <li frag>Ons voorbeeld is daarom niet goed: de huidige datum zou al vanaf de Controller meegegeven moeten worden in bijv. ViewData</li>
+                </ul>
+            </section>
+            <section h3="Refactored Controller en View">
+                In de Controller-class:
+                <i-code cs>
+                    public IActionResult Index()
+                    {
+                    ViewData["HuidigeTijd"] = DateTime.Now;
+                    return View();
+                    }
+                </i-code>
+                In de Razor-View:
+                <i-code cshtml>
+                    @{
+                    Layout = "";
+                    DateTime huidigeTijd = (DateTime) ViewData["HuidigeTijd"];
+                    }
+                    &lt;p&gt;@ViewData[&quot;HuidigTijd&quot;]&lt;/p&gt;
+                    &lt;p&gt;Het is nu @huidigeTijd.Hour : @huidigeTijd.Minute : @huidigeTijd.Second&lt;/p&gt;
+                </i-code>
+                Wat is code <i>refactoring</i> ook al weer?
+                <blockquote>
+                    Code refactoring is het proces van het herstructureren van bestaande computercode, zonder het externe gedrag te veranderen. Refactoring is bedoeld om het ontwerp, de structuur en / of implementatie van de software (de niet-functionele attributen) te verbeteren met behoud van de functionaliteit.
+                </blockquote>
+                <i-notes>
+                    verbeterde codeleesbaarheid
+                    verminderde complexiteit
+                    onderhoudbaarheid
+                    uitbreidbaarheid
+                    verbeterde prestaties
+                </i-notes>
+            </section>
+            <section h3="Meegeven van data aan de View mbv ViewData">
+                Lees de <a href="https://docs.asp.net/en/latest/tutorials/first-mvc-app/adding-view.html#passing-data-from-the-controller-to-the-view">MSDN</a>
+                <p frag>Met strings werkt ViewData prima</p>
+                <p frag>Met objecten (zoals DateTime) is het wat lastiger (er is casting nodig). </p>
+                <p frag>Dat wil je liever niet. Kan dat ook anders? </p>
+            </section>
+            <section h3="Oefening">
+                <sided>
+                    <side>
+                        <b>Oefening 1: </b>
+                        <ul>
+                            <li>Maak een View waarin je de voornaam, achternaam en adres van een student toont </li>
+                            <li>De gegevens komen nog niet uit een database maar zijn hardcoded</li>
+                            <li>Denk aan de rol van de Controller en de View volgens de regels van MVC</li>
+                        </ul>
+
+                        <b>Oefening 2: </b>
+                        <ul>
+                            <li>Zorg dat de volgende link werkt:</li>
+                            <li>
+                                <i-icode>localhost:8080/StudentAdmin/Student/1</i-icode>
+                            </li>
+                            <li>Ook <i-icode cs>List&lt;Student&gt;</i-icode> Studenten is hard coded (nog niet uit een database)</li>
+                            <li>De Action-methode Student toont het adres van Student 1 uit de lijst met Studenten</li>
+                            <li>Uiteraard mag de parameter ook 2 of 3 zijn</li>
+                        </ul>
+                    </side>
+                    <side>
+                        <img src="img/programmer.jpg" alt="Een programmeur">
+                    </side>
+                </sided>
+            </section>
+            <section h3="Nadelen van <i-icode cs>ViewData</i-icode>">
+                <ul>
+                    <li>Als je de view vergeten bent aan te maken?</li>
+                    <li frag>Of als je de Action method een andere naam geeft?</li>
+                    <li frag>En als je een typefout maakt in de key van het Dictonary-Object ViewData</li>
+                    <ul>
+                        <li frag>Bijvoorbeeld: <i-icode cs>ViewData["Namae"]</i-icode></li>
+                        <li frag>Is die key overigens case sensitive: <i-icode cs>ViewData["naaM"]</i-icode>?</li>
+                    </ul>
+                    <li frag>Klaagt de compiler over typefouten?</li>
+                    <li frag>Wat gebeurt er als je een object opvraagt dat nooit is aangemaakt?</li>
+                    <li frag>En als het casten niet is toegestaan?</li>
+                </ul>
+            </section>
+            <section h3="Hoe geef je het Model mee aan de View?">
+                <ul>
+                    <li>Omdat het gebruik van ViewData een aantal nadelen heeft is er een andere manier om data door te geven.</li>
+                    <li frag> Dat doe je door een (lijst met) Object(en) van een Model-class mee te geven aan de View</li>
+                    <li frag> Het grote voordeel:</li>
+                    <ul> 	<li frag> De compiler kan nu wel controleren of een property bestaat</li>
+                    <li frag> Het datatype gaat mee, dus casten wordt overbodig.</li>
+                    <li frag> En – niet onbelangrijk: Intellisense werkt ook in de Razor-file</li> </ul>
+                </ul>
+            </section>
+            <section h3="Implementatie Model (Stap 1)">
+                Aanmaken van een model class in de map Models. 
+                <i-code cs>
+                    namespace WebApplicationCoreVoorbeeld.Models
+                    {
+                        public class Student
+                        {
+                            public int StudentId { get; set; }
+                            public string Voornaam { get; set; }
+                            public string Achternaam { get; set; }
+                            public string Woonplaats { get; set; }
+                            public DateTime GeboorteDatum { get; set; }    
+                        }
+                    }
+                </i-code>
+            </section>
+            <section h3="Implementatie Controller (Stap 2)">
+                In de controller schrijf je de volgende code:
+                <i-code cs> 	
+                public IActionResult Student()
+                {
+                    Student s = new Student() {Voornaam = "Eva", Achternaam="Jansen",
+                                            StudentId =2, Woonplaats="Den Haag",
+                                            GeboorteDatum = new DateTime(1990, 11,25)};
+                    return View(s);
+                }
+                </i-code>
+                Later leer je nog hoe je de gegevens van Studenten in een MVC-applicatie bijvoorbeeld op kunt halen uit een database (i.p.v. het hier hard coded te programmeren)
+            </section>
+            <section h3="Implmentatie View (Stap 3)">
+                In de layout file behorend bij de action method
+                <i-code cshtml> 	
+                @model WebApplicationCoreVoorbeeld.Models.Student
+                @{
+                    Layout = &quot;&quot;;
+                }
+
+                &lt;div&gt;Student @Model.Voornaam @Model.Achternaam woont in @Model.Woonplaats&lt;/div&gt;
+                &lt;div&gt;Zij is geboren in @Model.GeboorteDatum.Year&lt;/div&gt;
+                &lt;div&gt;Haar id is: @Model.StudentId&lt;/div&gt;
+                </i-code>
+            </section>
+            <section h3="Je kunt ook een Lijst met studenten aan een View meegeven">
+                <i-code cs>  	
+                public IActionResult Studenten ()
+                {
+                    List&lt;Student&gt; lijst = new List&lt;Student&gt;() { new Student()   {
+                                                                    Voornaam = &quot;Eva&quot;,
+                                        ...
+                    return View(lijst);
+                }
+                </i-code>
+                Je geeft nu List als Model-object mee aan de View
+            </section>
+            <section h3="Hoe implementeer je de verwerking van die List in een View?">
+                Dit is allemaal conform de Razor syntax:
+                <i-code cshtml>
+                    @using WebApplicationCoreVoorbeeld.Models
+                    @model List&lt;Student&gt;
+                    @{
+                        Layout = &quot;&quot;;
+                    }
+                    @foreach (Student s in Model)
+                    {
+                        &lt;div&gt;Student @s.Voornaam @s.Achternaam woont in @s.Woonplaats&lt;/div&gt;
+                    }
+                </i-code>
+                De eerste <b>overbodige</b> spatie/enter na <icode cshtml>@foreach</icode> volgt na <icode>{</icode>. 
+            </section>
+            <section h3="Oefening voor het meegeven van een Model aan de View">
+                <sided>
+                    <side>
+                        <b>Oefening 1: </b>
+                            <ul>
+                                <li>Laat de volgende URL werken: </li>
+                                <li><i-code url>localhost:8080/StudentAdmin/Student/1</i-code></li>
+                                <li>Deze toont het adres van student 1 uit een List<Student>
+                                </li>
+                                <li>De List is hard coded gedefinieerd in de Controller</li>
+                                <li>Uiteraard mag de parameter ook 2 of 3 zijn</li>
+                            </ul>
+                        <b>Oefening 2: </b>
+                            <ul>
+                                <li>Laat de volgende URL werken: </li>
+                                <li><i-code url>localhost:8080/StudentAdmin/Student/1</i-code></li>
+                                <li>In de View wordt nette HTML gebruikt, waarmee de lijst met alle studenten wordt getoond.</li>
+                            </ul>
+                    </side>
+                    <side>
+                        <img src="img/programmer.jpg" alt="Een programmeur">
+                    </side>
+                </sided>
+            </section>
+            <section h2="Formulieren"></section>
+            <section h3="Een voorbeeld van een HTML-formulier">
+                Dit is HTML (geen Razor): 
+                <i-code html>
+                    &lt;div&gt;Aanmelden voor een seminar&lt;/div&gt;
+
+                    &lt;form name=&quot;aanmelding&quot; action=&quot;/administratie/aanmeldingverwerken&quot;
+                        method =&quot;get&quot;&gt;
+                        &lt;div&gt;Naam: &lt;input name=&quot;Naam&quot; type=&quot;text&quot; /&gt;&lt;/div&gt;
+                        &lt;div&gt;Geboortejaar: &lt;input name=&quot;Geboortejaar&quot; type=&quot;text&quot; /&gt;&lt;/div&gt;
+                        &lt;div&gt;&lt;input type=&quot;submit&quot; value=&quot;Aanmelden&quot; /&gt;&lt;/div&gt;
+                    &lt;/form&gt;
+                </i-code>
+                <img src="img/screenshot/htmltest.png" alt="Zo ziet het eruit" style="width:50%">      
+            </section>
+            <section h3="Hoe verwerk je de inhoud van zo’n formulier?">
+                Een voorbeeld van een Action Method in een Controller die de inhoud van een formulier verwerkt:
+                <i-code cs>
+                    public IActionResult AanmeldingVerwerken(string Naam, int Geboortejaar)
+                    {
+                        if (GeboorteJaar &lt; 1998)
+                        {
+                            ViewData[&quot;Message&quot;] = &quot;Hartelijk dank meneer/mevrouw &quot; + Naam;
+                        }
+                        else
+                        {
+                            ViewData[&quot;Message&quot;] = &quot;Helaas bent u nog te jong.&quot;;
+                        }
+                                
+                        return View();
+                    }
+                </i-code>
+                En de bijbehorende view:
+                <i-code cshtml> 	
+                    &lt;div&gt;We hebben uw aanmelding ontvangen.&lt;/div&gt;
+                    &lt;div&gt;@ViewData[&quot;Message&quot;]&lt;/div&gt;
+                </i-code>
+            </section>
+            <section h3="Uitleg verwerking">
+                <ul>
+                    <li>Parameters van de Action Method komen overeen met de namen van de velden in het HTML-formulier</li>
+                    <ul> 	<li frag>Wat gebeurt er als het geboortejaar geen integer is maar tekst?</li>
+                    <li frag>Of als de gebruiker geen waarde heeft ingevuld voor geboortejaar?</li> </ul>
+                    <li frag>Met HttpGet kun je parameters zien in de adresbalk</li>
+                    <li frag>Met HttpPost worden de parameters “onzichtbaar” meegegeven</li>
+                    <ul><li frag>Maak gebruik van “F12” op netwerk-tab om te ontdekken hoe het formulier dan wordt meegegeven.</li></ul>
+                    <li frag>NB: normaal zou je de aanmelding natuurlijk ook ergens opslaan zodat je later op kunt zoeken of meneer Jansen zich inderdaad heeft aangemeld.</li>
+                </ul>
+            </section>
+            <section h3="Oefening">
+                <ul>
+                    <li>Maak een formulier waarin 2 ingevoerde getallen bij elkaar worden opgeteld:</li>
+                    <ul> 	<li> Bij Submit worden de getallen opgeteld</li>
+                    <li> Bij een invoer van getallen 4 en 5 wordt de uitvoer "4 + 5 = 9".</li> </ul>
+                    <li> Uitbreiding: geef de gebruiker de mogelijkheid om te kiezen of 2 getallen opgeteld, afgetrokken, vermenigvuldigd of gedeeld moeten worden.</li>
+                    <ul> 	<li> Beperk je daarbij tot 1 formulier en 1 Submitbutton </li>
+                    <li> De operator kun je aangeven door deze:</li>
+                    <ul> 	<li> in een tekstveld in te voeren;</li>
+                    <li> te kiezen uit een lijst m.b.v. de selectie van 1 radiobutton of</li>
+                    <li> te kiezen uit een dropdown-lijst.</li> </ul> </ul>
+                </ul>
+            </section>
+            <section repeat=mvc></section>
+            <section h3="CRUD-functionaliteit">
+                <ul>
+                    <li>CRUD staat voor Create, Read, Update en Delete</li>
+                    <li> Veel applicaties hebben deze functionaliteit t.b.v. beheer van de data ingebouwd</li>
+                    <li> Bijvoorbeeld Personen, Studenten, Producten etc.</li>
+                    <li> Hieronder een voorbeeld van ingebouwde CRUD-functionaliteit voor Personen:</li>
+                </ul>
+                <img src="img/screenshot/CRUD.png" alt="Een voorbeeld front-end met CRUD acties">
+            </section>
+            <section h3="Implementatie van Create-functionaliteit">
+                <p>Voor welke entiteit willen we een Create maken?</p>
+                <p>Lees die vraag als: voor welke modelclass wil je een nieuw object aanmaken?</p>
+                <p>In dit geval doen we dat voor de modelclass <i-icode cs>Student</i-icode>: </p>
+                <i-code cs>
+                    public class Student
+                    {
+                        public int StudentId { get; set; }
+                        public string Naam { get; set; }
+                        public string Woonplaats { get; set; }
+                        public int GeboorteJaar { get; set; }
+                    }
+                </i-code>
+            </section>
+            <section h3="Formulier">
+                Het formulier moet alle velden van de modelclass bevatten die de gebruiker in mag vullen. Dus niet: het StudentId-veld
+                <i-code html> 	
+                    &lt;form name=&quot;aanmelding&quot; action=&quot;/administratie/create&quot; method =&quot;post&quot;&gt;
+                        &lt;div&gt;Naam: &lt;input name=&quot;Naam&quot; type=&quot;text&quot; /&gt;&lt;/div&gt;
+                        &lt;div&gt;Woonplaats: &lt;input name=&quot;Woonplaats&quot; type=&quot;text&quot; /&gt;&lt;/div&gt;
+                        &lt;div&gt;Geboortejaar: &lt;input name=&quot;Geboortejaar&quot; type=&quot;text&quot; /&gt;&lt;/div&gt;
+                        &lt;div&gt;&lt;input type=&quot;submit&quot; value=&quot;Aanmelden&quot; /&gt;&lt;/div&gt;
+                    &lt;/form&gt;
+                </i-code>
+                De conventie/afspraak is dat je met HttpPost naar een Action-method met dezelfde naam gaat
+            </section>
+            <section h3="Hoe wordt dat formulier nu verwerkt?">
+                <p>
+                    De Action-method Create in de Controller AdministratieController:
+                    <i-code cs> 	
+                        [HttpPost]
+                        public IActionResult Create(Student s)
+                        {
+                            //todo opslaan in de database
+                            return View(&quot;IsCreated&quot;, s);
+                        }
+                    </i-code>
+                    (De 1e parameter is de naam van de View, omdat de View met dezelfde naam (Create) al wordt gebruikt voor de View waarmee het formulier wordt getoond)
+                </p>
+                <p>
+                    De View in <i-icode fname>Views\IsCreated.cshtml</i-icode>:
+                    <i-code cshtml>
+                        @using WebApplicationCoreVoorbeeld.Models;
+                        @model Student
+
+                        &lt;div&gt;Er is een nieuwe student opgeslagen&lt;/div&gt;
+                        &lt;div&gt;Naam: @Model.Naam&lt;/div&gt;
+                        &lt;div&gt;Woonplaats: @Model.Woonplaats&lt;/div&gt;
+                        &lt;div&gt;Geboortejaar: @Model.Geboortejaar&lt;/div&gt;
+                    </i-code>
+                </p>
+            </section>
+            <section h3="Parameters van de Create methode">
+                <p>In het voorbeeld hebben we de modelclass Student gebruikt als inputparameter van de Action-method</p>
+                <ul>
+                    <li frag>zolang de namen van de HTML velden overeenkomen met de properties, gaat dat goed</li>
+                </ul>
+
+                <p frag>Je kunt ook alle attributen van Student als afzonderlijke parameters opnemen. Dat heeft nadelen:</p>
+                <ul>
+                    <li frag>Daar heb je meer code voor nodig en de namen/types moeten precies kloppen</li>
+                    <li frag>Bij elke wijziging van de Modelclass moet dit worden gewijzigd in alle Action-methods</li>
+                </ul>
+            </section>
+            <section h3="Redirect i.p.v. View teruggeven">
+                <ul>
+                    <li>Op de vorige pagina gebruikte je een View met een andere naam</li>
+                    <li frag>Na Create zie je ook vaak dat je doorgaat naar een lijst waarin de zojuist toegevoegde Student al is toegevoegd</li>
+                    <li frag>Voor het tonen van een lijst met Objecten wordt standaard gebruik gemaakt van de Action Index: <i-icode cs>return RedirectToAction("Index");</i-icode></li>
+                    <li frag>Waarom doen we dat op deze manier?</li>
+                </ul>
+            </section>
+            <section h3="RedirectToAction na Post Action-method">
+                <a href="https://en.wikipedia.org/wiki/Post/Redirect/Get">Wikipedia</a>
+                <ul>
+                    <li><b>Post/Redirect/Get (PRG)</b> is een web development design pattern dat voorkomt dat er meerdere keren een zelfde form wordt gepost</li>
+                    <li frag> Samengevat: door de Redirect voorkom je dat een record 2x wordt toegevoegd als de gebruiker voor F5 (verversen) kiest:</li>
+                    <ul> 	<li frag> In dat geval wordt namelijk de Action-method Index opnieuw opgevraagd</li>
+                    <li frag> en niet de HttpPost-action Create waar nog een keer hetzelfde nieuwe record wordt toegevoegd.</li> </ul>
+                    <li frag> Het principe PRG zegt dat je na een Post-Action altijd een Redirect doet en nooit rechtstreeks een View teruggeeft.</li>
+                </ul>
+            </section>
+            <section h3="HTML-Links">
+                <ul>
+                    <li>In het screenshot zijn Create new, Edit, Details en Delete normale HTML links: <i-icode html>&lt;a href=...</i-icode>
+                    </li>
+                    <li> Naar welke Action-method gaat: <i-icode html>&lt;a href=&quot;/Studenten/Create&quot;&gt;klik hier&lt;/a&gt;</i-icode>
+                    </li>
+                    <li> De <i-def>routing logic</i-def> zorgt ervoor dat als de gebruiker op deze link klikt en dus een HTTP(S)-request maakt dat hij/zij in de juiste controller bij de juiste Action-method terecht komt.</li>
+                </ul>
+                
+                <img src="img/screenshot/CRUD.png" alt="Een voorbeeld front-end met CRUD acties">
+            </section>
+            <section h3="Realisatie van de Edit-Action">
+                <ul>
+                    <li>Deze is vrijwel gelijk aan Create</li>
+                    <li> Maak een Action-method Edit</li>
+                    <ul> 	<li> <i-icode url>http://localhost/students/edit/3</i-icode></li>
+                    <li> De 3 is gelijk aan het id van de student die je wilt editen</li>
+                    <li> LET OP dat je de parameter in de routing in Startup.cs zet op <i-icode>{…}/{…}/{id?}</i-icode></li> </ul>
+                    <li> Het grote verschil is dat het formulier nu wordt gevuld met bestaande waarden (van Student met id 3)</li>
+                    <ul> 	<li> Het formulier is dus niet meer leeg zoals bij de Create.</li>
+                    <li> Het is belangrijk dat je de id van het record kent om het formulier in te kunnen vullen.</li> </ul>
+                    <li> De verwerking gebeurt weer in een HttpPost-action Edit</li>
+                    <ul><li> Deze zal nu een bestaand record wijzigen i.p.v. een nieuwe toevoegen</li></ul>
+                </ul>
+            </section>
+            <section h3="Realisatie van de Read-Action">
+                <ul>
+                    <li>Een lijst met alle records is volgens de standaard conventie de action Index</li>
+                    <ul><li> <i-icode url>http://localhost/students/index</i-icode></li></ul>
+                    <li> Een pagina met gegevens van 1 student is standaard</li>
+                    <ul> 	<li> <i-icode url>http://localhost/students/details/4</i-icode></li>
+                    <li> De StudentId (met id als naam voor de parameter) is in dit geval gelijk aan 4</li> </ul>
+                </ul>
+            </section>
+            <section h3="Realisatie van de Delete-Action">
+                <ul>
+                    <li>Om een record te verwijderen is de link</li>
+                    <ul> 	<li> <i-icode url>http://localhost/students/delete/4</i-icode></li>
+                    <li> De StudentId (met id als naam voor de parameter) is in dit geval gelijk aan 4</li> </ul>
+                    <li> Na de Submit wordt om bevestiging gevraagd: "Weet je zeker dat je deze Student wilt verwijderen?"</li>
+                    <li> Een Student wordt pas echt verwijderd in de HttpPost-Action Delete</li>
+                </ul>
+            </section>
+            <section h3="Oefening">
+                <sided>
+                    <side>
+                        <ul>
+                            <li>Maak de complete CRUD-cyclus voor 1 entiteit</li>
+                            <ul><li> Bijvoorbeeld voor het beheer van een product (naam, omschrijving, fabrikant en prijs)</li></ul>
+                            <li> Gebruik Modelclasses waar dit kan!</li>
+                            <li> Uitbreiding: Is het ook mogelijk om te valideren dat de naam van een product niet leeg mag zijn?</li>
+                            <ul><li> Of: dat de prijs verplicht hoger ligt dan € 0,00?</li></ul>
+                            <li> In Tutorials kun je ook <i-def>Tag Helpers</i-def> terugvinden</li>
+                            <li> Gebruik deze nu nog niet maar gebruik alleen standaard HTML in je View- en Layout-bestanden</li>
+                            <li> Tag Helpers worden in latere lessen nog behandeld</li>
+                        </ul>
+                    </side>
+                    <side>
+                        <img src="img/programmer.jpg" alt="Een programmeur">
+                    </side>
+                </sided>
+            </section>
+            <section h2="Blazor">
+                Blazor is misschien de toekomst, maar voor semester 3 is het verboden.
+                Blazor is geen Razor
+            </section>
+            <section h2="Volgende les...">
+                wat gaan we de volgende les doen?....
+            </section>
+            <!-- TODO: !1 = false -->
+            <!-- wedstrijdje: zelf minifyen -->
+            <!-- TODO: highlight URLS: URI = scheme:[//authority]path[?query][#fragment] and authority = [userinfo@]host[:port] -->
+        </i-slides>
+    </div>
+    <script src="code/scripts.js"></script>
+</body>
+
+</html>

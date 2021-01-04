@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   viewBox="0 0 24 24"
+   id="svg10"
+   sodipodi:docname="file - 2.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata16">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="870"
+     inkscape:window-height="648"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="13.906433"
+     inkscape:cx="12.70692"
+     inkscape:cy="9.0182443"
+     inkscape:window-x="1455"
+     inkscape:window-y="221"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg10" />
+  <path
+     d="m13 9h5.5l-5.5-5.5v5.5m-7-7h8l6 6v12a2 2 0 0 1 -2 2h-12c-1.11 0-2-.9-2-2v-16c0-1.11.89-2 2-2m9 16v-2h-9v2h9m3-4v-2h-12v2h12z"
+     fill="#757575"
+     style="fill:#a3a3a3;fill-opacity:1"
+     id="path2" />
+  <path
+     inkscape:connector-curvature="0"
+     style="fill:#ab47bc;stroke-width:11.85173512"
+     d="m 20.715131,15.869669 -2.677145,2.152956 2.677145,2.07408 v -4.227036 m -6.932537,5.579712 -1.52174,-0.958142 v -5.072464 l 1.690805,-0.563599 2.423522,1.876812 4.903349,-4.525755 2.254406,1.409028 v 8.7358 l -2.818008,1.127202 -4.317225,-4.136847 -2.615109,2.10786 M 13.951674,18.969402 15,18 13.951674,16.996771 Z"
+     id="path2-3" />
+</svg>

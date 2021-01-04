@@ -1,0 +1,60 @@
+Cross-origin resource sharing (CORS
+
+images, stylesheets, scripts, iframes, and videos
+
+
+stackoverflow heeft geen www. Dus cookies zijn heel het domein breed
+
+<!doctype html>
+<html lang="nl">
+<head>
+    <title>C#</title>
+    <meta name="keywords" content="CSS,SVG,SCSS,HTML,Selector" />
+    <meta name="description" content="Les 2">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+    <style>
+        .tipdiv {
+            position: relative;
+            display: inline-block;
+        }
+        .tipdiv .tip {
+            visibility: hidden;
+            width: 120px;
+            background-color: #040505;
+            font-size:13px;color:#fff;
+            text-align: center;
+            border-radius: 3px;
+            padding: 4px 0;
+            position: absolute;
+            z-index: 1;
+            top: 105%;
+            left: 50%;
+            margin-left: -60px;
+        }
+
+        .tipdiv .tip::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #040505 transparent;
+        }
+
+        .tipdiv:hover .tip {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h3="Wat is een hash?">
+            </section>
+        </i-slides>
+    </div>
+    <script src="code/scripts.js"></script>
+</body>
+</html>

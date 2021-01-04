@@ -1,0 +1,76 @@
+Als je een webpagina vergelijkt met een huis, welke metafoor past dan het best bij HTML en CSS?
+
+HTML als schroevendraaier en CSS als een muur.
+CSS als de muren en HTML als bijv. de kleur van die muur.
+- HTML als de muren en CSS als bijv. de kleur van die muur.
+HTML als de muren en CSS als een schroevendraaier.
+
+Als je de structuur van een pagina in Chrome inspecteert, wat zie je dan?
+
+Alle elementen in de structuur zijn zichtbaar op de pagina.
+- Alle elementen in de pagina blijken rechthoekig te zijn.
+Niet alle tekst op pagina is terug te vinden in structuur.
+Niet alle elementen in de pagina komen voor in de structuur.
+
+CAPTURE Als je structuur bekijkt, welke uitspraak is dan het beste van toepassing op de geopende <td>?
+
+<td ...> bestaat uit een <font ...>-element.
+<td ...> bevat tekst.
+- <td ...> bestaat uit een <font ...>-element dat tekst bevat.
+<td ...> is leeg.
+
+CAPTURE2 Welke font-size van de links gemarkeerde tekst is van toepassing in CSS?
+
+1
+- x-small
+font-size is onbekend
+$0
+
+CAPTURE3 Welke uitspraak is het meest van toepassing op de geselecteerde regel in de HTML-boom?
+
+De achtergrond is onbekend in class 'surprise' en dus groen.
+#first in CSS is gelinkt aan class first in HTML.
+- De achtergrond voor element met id 'first' is groen
+De achtergrond is onbekend.
+
+CAPTURE4 Welke uitspraak is het meest van toepassing op de geselecteerde regel in de HTML-boom?
+
+- Opmaak van 'div' met id 'first' staat in CSS onder #first.
+De 'div' met id 'first' is vierkant.
+Er is geen relatie tussen HTML en CSS.
+De 'div' met class 'surprise' is vierkant.
+
+CAPTURE5 Welke uitspraak is het meest van toepassing op de geselecteerde regel in de HTML-boom?
+
+Opmaak van 'div' met class 'first' staat in CSS bij #first.
+- De 'div' met id 'first' is vierkant.
+Er is geen relatie tussen HTML en CSS.
+De 'div' met class 'surprise' is rond.
+
+CAPTURE6 Wat is het grootste probleem met deze HTML-structuur?
+
+- Er zijn geen betekenisvolle namen gebruikt.
+Er zit een syntaxfout in de HTML.
+De HTML bevat geen beschrijving van de opmaak van de pagina.
+In de boom bevat een <div> een andere <div>.
+
+CAPTURE7 Welke uitspraak is het meest van toepassing op deze HTML-structuur?
+
+- Opmaak van <div class="title"> staat in CSS onder .title {}.
+Er zit een syntaxfout in de HTML.
+Opmaak van <div class="title"> staat in CSS onder #title {}.
+Een <div> mag geen andere <div> bevatten.
+
+CAPTURE8 Welke css-code zorgt ervoor dat de tekst 'titel' rood wordt getoond in de browser?
+
+#titel { color: red; }
+.titel { color: red; }
+#footer {color: red; }
+.footer { color: red; }
+
+CAPTURE9 Welke css-code zorgt ervoor dat de tekst 'footer' rood wordt getoond in de browser?
+
+#titel { color: red; }
+.titel { color: red; }
+- body {color: red; }
+.footer { color: red; }

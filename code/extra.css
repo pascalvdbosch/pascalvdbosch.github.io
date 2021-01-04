@@ -1,0 +1,163 @@
+
+sided {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    text-align: left;
+}
+
+sided>side {
+    display: table-cell;
+    vertical-align: top;
+    width: 50%;
+    padding: 0% 0 0% 0%;
+}
+
+side~side {
+    display: table-cell;
+    vertical-align: top;
+    width: 50%;
+    padding: 0% 0 0% 0%;
+}
+
+.zoom {
+    transition: transform .2s;
+}
+
+.zoom:hover {
+    transform: scale(1.5);
+}
+
+li.fragment.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+li.fragment {
+    opacity: .3 !important;
+    visibility: visible !important;
+}
+
+p.fragment.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+p.fragment {
+    opacity: .3 !important;
+    visibility: visible !important;
+}
+
+img.fragment.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+img.fragment:not(.gone) {
+    opacity: .3 !important;
+    visibility: visible !important;
+}
+
+i-code.fragment.visible:not(.fade-in-then-out) pre code {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+i-code.fragment:not(.fade-in-then-out) pre code {
+    opacity: .3 !important;
+    visibility: visible !important;
+}
+
+
+.inline.hljs {
+    display: inline;
+}
+
+
+
+.reveal pre.smallfont {
+    font-size: .4em;
+}
+
+preinline {
+    font-family: monospace;
+}
+
+
+
+.scrollable-slide {
+    height: 100%;
+    overflow-y: auto !important;
+}
+
+/* section { border: 1pt; border-style: solid; } */
+
+.reveal blockquote {
+    font-family: Georgia, serif;
+    font-style: italic;
+    margin: 0.25em 0;
+    padding: 0.35em 40px;
+    position: relative;
+    color: #383838;
+    margin: 20px auto;
+    box-shadow: none;
+}
+    
+    blockquote:before {
+    display: block;
+    padding-left: 10px;
+    content: "\201C";
+    font-size: 4em;
+    position: absolute;
+    left: -.4em;
+    top: -.3em;
+    color: #7a7a7a;
+    }
+    
+    blockquote cite {
+    color: #999999;
+    font-size: 14px;
+    display: block;
+    margin-top: 5px;
+    }
+
+
+    .hljs {padding: 0px;}
+
+.reveal pre code {
+    max-height: unset;
+}
+
+
+.hljs-allname {
+    color: #444;
+}
+
+.hljs-extension {
+    color: #72798D;
+}
+
+.hljs-basename {
+    color: #444;
+}
+
+.hljs-allname:last-child { color: #000; }
+.hljs-allname:last-child > .hljs-basename {
+    color: #000;
+}
+.hljs-allname:last-child > .hljs-extension {
+    color: #5B6EA4;
+}
+
+
+.hljs-http, .hljs-https, .hljs-port, .hljs-slash {
+    color: #444;
+}
+
+
+
+.CodeMirror * {
+    text-align: left;
+    font-size: 24px;
+}
+

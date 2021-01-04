@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="nl">
+
+<head>
+    <meta charset="utf-8">
+    <title>Filteren, Sorteren, Pagineren, 1-op-veel scaffolden</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="Les 10">
+    <style>
+        li.fragment {
+            visibility: hidden !important;
+        }
+
+        p.fragment {
+            visibility: hidden !important;
+        }
+
+        img.fragment:not(.gone) {
+            visibility: hidden !important;
+        }
+
+        i-code.fragment:not(.fade-in-then-out) pre code {
+            visibility: hidden !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <i-slides>
+            <section h2="Inleiding">
+                <p>Tijdens college bouwen we verder aan bestaande Index</p>
+                <p frag>We voegen toe:</p>
+                <ul>
+                    <li frag>Én sortering</li>
+                    <li frag>Én filtering</li>
+                    <li frag>Én paginering</li>
+                </ul>
+                <p frag>En dat allemaal in één methode?</p>
+                <ul>
+                    <li frag>Hou de bestaande action Index zo eenvoudig mogelijk</li>
+                    <li frag>Bouw Index op uit aanroepen van methodes</li>
+                    <li frag>En maak voor sorteren, filteren en pagineren aparte methodes. </li>
+                    <li frag>Code smell: <a href="https://refactoring.guru/smells/long-method">long method</a></li>
+                    <li frag>Code smell: <a href="https://refactoring.guru/smells/duplicate-code">duplicate code</a>, bij andere Index actions. </li>
+                </ul>
+                <p frag>Aan het eind van het college komt de code op Blackboard. </p>
+                <p frag>In de opdracht breiden we de code uit. </p>
+            </section>
+            <section h2="LINQ: IEnumerable vs IQueryable">
+                <ul>
+                    <li>Tot nu toe: LINQ 'achter elkaar' geplakt. Nu: ook tijdelijk in variabelen opslaan. </li>
+                    <li frag>Beide werken met deferred execution</li>
+                    <li frag>IQueryable implementeert IEnumerable</li>
+                    <li frag>Voorbeeld: 
+                        <i-code cs>
+                            IEnumerable&lt;Student&gt; first = db.Students;
+                            var second = first.Where(s =&gt; s.Naam == &quot;Bob&quot;);
+                            var third = second.Where(s =&gt; s.Id &gt; 100);
+                            var result = third.Where(s =&gt; s.Id &lt; 200);
+                            Console.Write(result.First().Naam);
+                        </i-code>
+                        Er wordt <i-icode>SELECT * FROM Students</i-icode> uitgevoerd. Verander IEnumerable in IQueryable en er wordt <i-icode>SELECT TOP 1 * FROM Students WHERE Naam = &quot;Bob&quot; AND Id &gt; 100 AND AND Id &lt; 200</i-icode> uitgevoerd. 
+                    </li>
+                    <li frag>Kijk naar de verschillende parametertypen</li>
+                    <li frag>Niet alles mag in een 'expressie'</li>
+                    <li frag><i class="fa fa-exclamation-triangle"></i> Dit is niet OO! <i class="fa fa-exclamation-triangle"></i></li>
+                </ul>
+            </section>
+            <section h3="Lees de SQL query uit de IQueryable">
+                <p><a href="https://stackoverflow.com/a/51583047/815305">Bron</a> (voor EF Core 5.0 is dit niet nodig)</p>
+                <i-code cs size=small>
+                    public static string ToSql&lt;TEntity&gt;(this IQueryable&lt;TEntity&gt; query) where TEntity : class
+                    {
+                        var enumerator = query.Provider.Execute&lt;IEnumerable&lt;TEntity&gt;&gt;(query.Expression).GetEnumerator();
+                        var relationalCommandCache = enumerator.Private(&quot;_relationalCommandCache&quot;);
+                        var selectExpression = relationalCommandCache.Private&lt;SelectExpression&gt;(&quot;_selectExpression&quot;);
+                        var factory = relationalCommandCache.Private&lt;IQuerySqlGeneratorFactory&gt;(&quot;_querySqlGeneratorFactory&quot;);
+                        return factory.Create().GetCommand(selectExpression).CommandText;
+                    }
+                
+                    private static object Private(this object obj, string privateField) =&gt; 
+                        obj?.GetType().GetField(privateField, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(obj);
+                    private static T Private&lt;T&gt;(this object obj, string privateField) =&gt; 
+                        (T)obj?.GetType().GetField(privateField, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(obj);
+                </i-code>
+                <p>Alternatief: log alle SQL queries</p>
+            </section>
+            <section h2="Sorteren"></section>
+            <section h3="Het sorteren van een lijst">
+                <p>Hoe wordt een lijst gesorteerd?</p>
+                <i-code cs frag>
+                    return View(await _context.Student.OrderBy(s =&gt; s.Naam).ToListAsync());
+                </i-code>
+                <p frag>Sorteren kan op meerdere manieren: </p>
+                <ul>
+                    <li frag>verschillende properties van een <i-icode>Student</i-icode> (tegelijkertijd?)</li>
+                    <li frag>sorteren kan alfabetisch of in omgekeerde volgorde (<i-icode>OrderByDescending</i-icode>)</li>
+                </ul>
+                <p frag><strong>In deze demo: alleen sorteren op Naam. </strong></p>
+            </section>
+            <section h3="Sorteer-opties">
+                <p>Er moeten sorteeropties van de client naar de server. </p>
+                <ul>
+                    <li frag>
+                        In de argumenten van de action in de Controller (via query parameters (href) of post data (form))
+                    </li>
+                    <li frag>
+                        In de View (argument had ook een boolean kunnen zijn, maar misschien in de toekomst wordt dit naam_oplopend): 
+                        <i-code cs>
+                            &lt;a href=&quot;/Students?sorteerVolgorde=oplopend&quot;&gt;↑&lt;/a&gt;
+                            &lt;a href=&quot;/Students?sorteerVolgorde=aflopend&quot;&gt;↓&lt;/a&gt;
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Iets beter (<a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/tag-helpers/built-in/anchor-tag-helper">Anchor Tag Helpers</a>): 
+                        <i-code cs>
+                            &lt;a asp-action=&quot;Index&quot; asp-route-sorteerVolgorde=&quot;oplopend&quot;&gt;
+                        </i-code>
+                    </li>
+                    <li frag>
+                        In de Controller: 
+                        <i-code cs>
+                            public async Task&lt;IActionResult&gt; Index(string sorteerVolgorde)
+                        </i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h3="De action">
+                <i-code cs>
+                    IQueryable&lt;Student&gt; lijst = _context.Student;
+                    switch (sorteerVolgorde)
+                    {
+                        case &quot;aflopend&quot;: lijst = lijst.OrderByDescending(s =&gt; s.Naam); break;
+                        default: lijst = lijst.OrderBy(s =&gt; s.Naam); break;
+                    }
+                    return View(await lijst.ToListAsync());
+                </i-code>
+            </section>
+            <section h3="De Sort methode">
+                <p>Maak er een aparte methode van. </p>
+                <i-code cs>
+                    private IQueryable&lt;Student&gt; Sort(string sorteerVolgorde)
+                    {
+                        IQueryable&lt;Student&gt; lijst = _context.Student;
+                        switch (sorteerVolgorde)
+                        {
+                            case &quot;aflopend&quot;: lijst = lijst.OrderByDescending(s =&gt; s.Naam); break;
+                            default: lijst = lijst.OrderBy(s =&gt; s.Naam); break;
+                        }
+                        return lijst;
+                    }
+                    public async Task&lt;IActionResult&gt; Index(string sorteerVolgorde)
+                    {
+                        return View(await Sort(sorteerVolgorde).ToListAsync());
+                    }
+                </i-code>
+                <p>De methode Sort hoeft niet async te zijn!</p>
+            </section>
+            <section h3="Onthouden sorteeropties client-side">
+                <ul>
+                    <li>
+                        Er moeten sorteeropties van de Controller naar de View. 
+                    </li>
+                    <li frag>
+                        In ViewData (of ViewBag) of in een ViewModel. 
+                    </li>
+                    <li frag>
+                        <i-code cs>
+                            ViewData[&quot;Sorteer&quot;] = sorteerVolgorde ?? &quot;oplopend&quot;;
+                        </i-code>
+                    </li>
+                    <li frag>
+                        Pas op: <i-icode>ViewData["..."] == "....."</i-icode> checkt alleen op reference, doe een cast. s
+                        <i-code cs>
+                            @if ((string)ViewData[&quot;Sorteer&quot;] == &quot;aflopend&quot;)
+                            { &lt;a asp-action=&quot;Index&quot; asp-route-sorteerVolgorde=&quot;oplopend&quot;&gt;↑&lt;/a&gt; }
+                            else
+                            { &lt;a asp-action=&quot;Index&quot; asp-route-sorteerVolgorde=&quot;aflopend&quot;&gt;↓&lt;/a&gt; }
+                        </i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h2="Filter"></section>
+            <section h3="De action ontvangt de zoekopdracht">
+                <i-code cs>
+                    public async Task&lt;IActionResult&gt; Index(string sorteerVolgorde, string filter)
+                    {
+                        IQueryable&lt;Student&gt; lijst = Sort(sorteerVolgorde);
+                        lijst = Filter(lijst, filter);
+                        return return View(await lijst.ToListAsync());
+                    }
+                </i-code>
+                <ul>
+                    <li frag>Je ziet: we houden de Action nog steeds zo eenvoudig mogelijk!</li>
+                    <li frag>Het sorteren en zoeken hebben we uitbesteed aan twee aparte methodes.</li>
+                    <li frag>Hou de namen van de methodes zo algemeen mogelijk: misschien later veralgemeniseren voor andere properties?</li>
+                    <li frag>De methodes Sort en Filter maken gebruik van deferred execution en hoeven dus niet asynchroon uitgevoerd te worden</li>
+                </ul>
+            </section>
+            <section h3="Filteren – het filteren zelf">
+                <i-code cs>
+                    private IQueryable&lt;Student&gt; Filter(IQueryable&lt;Student&gt; lijst, string filter)
+                    {
+                        if (!String.IsNullOrEmpty(filter))
+                            lijst = lijst.Where(s =&gt; s.Naam.Contains(filter));
+                        return lijst;
+                    }
+                </i-code>
+                <ul>
+                    <li>
+                        Dit is heel eenvoudig en kan ingewikkelder
+                        <ul>
+                            <li>Hoofdlettergevoeligheid: <i-icode>.ToLower()</i-icode></li>
+                            <li>Wat als een woord meerdere keren voorkomt?</li>
+                            <li>Wat als een woord verkeerd wordt gespeld?</li>
+                            <li>Wat als de database heel groot is? Inverted index? Full-text seach?</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Zoekopdracht opsturen">
+                <p>Er is een <i-icode>input</i-icode> nodig, dus een <i-icode>form</i-icode> in de View: er wordt bovenaan de pagina een formulier met zoekbox en button toegevoegd
+                </p>
+                <i-code html>
+                    &lt;form asp-action=&quot;Index&quot; method=&quot;get&quot;&gt;
+                        Filter: &lt;input type=&quot;text&quot; name=&quot;filter&quot; /&gt;
+                        &lt;input type=&quot;submit&quot; value=&quot;Filter&quot; /&gt;
+                    &lt;/form&gt;
+                </i-code>
+            </section>
+            <section h3="Zoekopdracht opsturen (inclusief onveranderde sorteeropties)">
+                <p>Voeg een hidden veld toe om de sorteeropties te bewaren: </p>
+                <i-code html>
+                    &lt;form asp-action=&quot;Index&quot; method=&quot;get&quot;&gt;
+                        &lt;input type=&quot;hidden&quot; name=&quot;sorteerVolgorde&quot; value=&#039;@ViewData[&quot;Sorteer&quot;]&#039; /&gt;
+                        Filter: &lt;input type=&quot;text&quot; name=&quot;filter&quot; /&gt;
+                        &lt;input type=&quot;submit&quot; value=&quot;Filter&quot; /&gt;
+                    &lt;/form&gt;
+                </i-code>
+                <p>Geen post maar een get: de client moet de url kunnen bookmarken/sharen...</p>
+            </section>
+            <section h3="Onthouden filteropties client-side">
+                <p>HTML: </p>
+                <i-code html>
+                    &lt;form asp-action=&quot;Index&quot; method=&quot;get&quot;&gt;
+                        &lt;input type=&quot;hidden&quot; name=&quot;sorteerVolgorde&quot; value=&#039;@ViewData[&quot;Sorteer&quot;]&#039; /&gt;
+                        Filter: &lt;input type=&quot;text&quot; name=&quot;filter&quot; value=&#039;@ViewData[&quot;Filter&quot;]&#039; /&gt;
+                        &lt;input type=&quot;submit&quot; value=&quot;Filter&quot; /&gt;
+                    &lt;/form&gt;
+                </i-code>
+                <p>HTML: </p>
+                <i-code html>
+                    &lt;a asp-action=&quot;Index&quot; 
+                          asp-route-sorteerVolgorde=&quot;oplopend&quot; 
+                          asp-route-filter=&#039;ViewData[&quot;Filter&quot;]&#039;&gt;↑&lt;/a&gt;
+                </i-code>
+                <p>C#: </p>
+                <i-code cs>
+                    ViewData["Filter"] = filter;
+                </i-code>
+                <p><i-icode>ViewData</i-icode>: Het filter wordt bewaard om te kopiëren naar de searchbox</p>
+            </section>
+            <section h2="Pagineren"></section>
+            <section h3="De nieuwe action">
+                <i-code cs size=small>
+                    private IQueryable&lt;Student&gt; Pagineer(IQueryable&lt;Student&gt; lijst, int pagina)
+                    {
+                        return lijst.Skip(10 * pagina).Take(10);
+                    }
+                    public async Task&amp;lt;IActionResult&amp;gt; Index(string sorteerVolgorde, string filter, int pagina)
+                    {
+                        return View(await Pagineer(Filter(Sort(sorteerVolgorde), filter), pagina).ToListAsync());
+                    }
+                </i-code>
+                <ul>
+                    <li><i-icode>pagina</i-icode> begint bij 0</li>
+                    <li>Wat gebeurt er als <i-icode>pagina</i-icode> negatief wordt?</li>
+                    <li>
+                        <i-code cs size=small>
+                            ViewData["Pagina"] = pagina;
+                        </i-code>
+                    </li>
+                    <li> HTML:
+                        <i-code html size=small>
+                            &lt;a asp-action=&quot;Index&quot; asp-route-pagina=&quot;@((int)ViewData[&quot;Pagina&quot;] - 1)&quot;
+                            asp-route-sorteerVolgorde=&#039;@ViewData[&quot;Sorteer&quot;]&#039;
+                            asp-route-filter=&#039;@ViewData[&quot;Filter&quot;]&#039;&gt;
+                                ←
+                            &lt;/a&gt;
+                            &lt;a asp-action=&quot;Index&quot; asp-route-pagina=&quot;@((int)ViewData[&quot;Pagina&quot;] + 1)&quot;
+                            asp-route-sorteerVolgorde=&#039;@ViewData[&quot;Sorteer&quot;]&#039;
+                            asp-route-filter=&#039;@ViewData[&quot;Filter&quot;]&#039;&gt;
+                                →
+                            &lt;/a&gt;
+                        </i-code>
+                    </li>
+                </ul>
+            </section>
+            <section h3="Oops">
+                <ul>
+                    <li>Zoek eerst op Alice. </li>
+                    <li>Ga dan naar pagina 2. </li>
+                    <li>Zoek dan op Bob. </li>
+                    <li>Is het gewenst dat de pagina op 2 blijft staan?</li>
+                    <li>In de form met de zoekopdracht, reset de pagina. 
+                        <i-code html size=small>
+                            &lt;form asp-action=&quot;Index&quot; method=&quot;get&quot;&gt;
+                                &lt;input type=&quot;hidden&quot; name=&quot;sorteerVolgorde&quot; value=&#039;@ViewData[&quot;Sorteer&quot;]&#039; /&gt;
+                                &lt;input type=&quot;hidden&quot; name=&quot;pagina&quot; value=&#039;0&#039; /&gt;
+                                Filter: &lt;input type=&quot;text&quot; name=&quot;filter&quot; /&gt;
+                                &lt;input type=&quot;submit&quot; value=&quot;Filter&quot; /&gt;
+                            &lt;/form&gt;
+                        </i-code>
+                    </li>
+                    <li>
+                        In de link voor de sorteervolgorde, reset de pagina. 
+                        <i-code html size=small>
+                            &lt;a asp-action=&quot;Index&quot; 
+                                asp-route-pagina=&quot;0&quot; 
+                                asp-route-sorteerVolgorde=&quot;oplopend&quot; 
+                                asp-route-filter=&#039;ViewData[&quot;Filter&quot;]&#039;&gt;↑&lt;/a&gt;
+                        </i-code>
+                    </li>
+                    <li>
+                        Op een gegeven moment is de lijst leeg... Doorklikken hoort niet te kunnen...
+                    </li>
+                </ul>
+            </section>
+            <section h3="Een nieuw model maken">
+                <p>We kunnen extra ViewData toevoegen, maar nu maken we liever een nieuw Model aan. </p>
+                <p>Compositie vs. overerving</p>
+                <p>
+                    Herriner: 
+                    <i-code cs size=small>
+                        private IQueryable&lt;Student&gt; Pagineer(IQueryable&lt;Student&gt; lijst, int pagina)
+                        {
+                            return lijst.Skip(10 * pagina).Take(10);
+                        }                   
+                    </i-code>
+                </p>
+                <p>We maken een speciaal soort lijst: 
+                    <i-code cs size=small>
+                        public class GepagineerdeList&lt;T&gt; : List&lt;T&gt;
+                        {
+                            public int Pagina { get; private set; }
+                            public int PaginaAantal { get; private set; }
+                            public GepagineerdeList(List&lt;T&gt; lijstDeel, int totaalAantal, int pagina, int perPagina)
+                            {
+                                Pagina = pagina;
+                                PaginaAantal = (int)Math.Ceiling (totaalAantal / (double)perPagina);
+                                this.AddRange(lijstDeel);
+                            }
+                            public bool HeeftVorige() {  return Pagina &gt; 0; }
+                            public bool HeeftVolgende() { return Pagina &lt; PaginaAantal - 1; }                        
+                        }
+                    </i-code>
+                </p>
+                <p>De Pagineer methode wordt een statische methode...</p>
+            </section>
+            <section h3="Het nieuwe model gebruiken">
+                <p>(Constructors kunnen niet async zijn)</p>
+                <i-code cs size=small>
+                    public static async Task&lt;GepagineerdeList&lt;T&gt;&gt; CreateAsync(
+                        IQueryable&lt;T&gt; lijst, int pagina, int perPagina)
+                    {
+                        return new GepagineerdeList&lt;T&gt;(
+                            await lijst.Skip(pagina * perPagina).Take(perPagina).ToListAsync(), 
+                            await lijst.CountAsync(), 
+                            pagina, 
+                            perPagina);
+                    }
+                </i-code>
+                <p frag>En in de action: </p>
+                <i-code size=small frag>
+                    public async Task&lt;IActionResult&gt; Index(string sorteerVolgorde, string filter, int pagina)
+                    {
+                        return View(await GepagineerdeList&lt;Student&gt;.CreateAsync(Filter(Sort(sorteerVolgorde), filter), pagina, 3));
+                    }
+                </i-code>
+                <p frag>Verwijder alle ViewData!</p>
+            </section>
+            <section h3="Oops: DisplayForName werkt alleen voor List">
+                <ul>
+                    <li>Gebruik .FirstOrDefault() om een element of leeg element te pakken, of</li>
+                    <li>maak een IEnumerable van het Model en cast daarna waar nodig. </li>
+                </ul>
+            </section>
+            <section h3="Gebruik maken van HeeftVorige en HeeftVolgende">
+                <i-code>
+                    class='btn btn-default @(Model.HeeftVorige() ? "" : "disabled")'
+                </i-code>
+            </section>
+            <section h3="Alternatieven/extras">
+                <ul>
+                    <li><i-icode>AsNoTracking</i-icode></li>
+                    <li>Geef alle data door aan de gebruiker, en blader client-side door de data heen (nadeel=performance, voordeel=performance)</li>
+                    <li>Maak een 'sessie' aan server-side zodra de gebruiker een zoekopdracht doet om te voorkomen dat <strong>de resultaten verschuiven tijdens het bladeren</strong></li>
+                </ul>
+            </section>
+            <section h2="Scaffolden van relaties"></section>
+            <section h3="One-to-many">
+                <i-code size=small>
+                    public class Klas
+                    {
+                        public int Id { get; set; }
+                        public string Naam { get; set; }
+                    }
+                    public class Student
+                    {
+                        public int Id { get; set; }
+                        public string Naam { get; set; }
+                        public Klas Klas { get; set; }
+                    }
+                </i-code>
+                <p>2x scaffolden! Migraties runnen en database updaten. </p>
+                <p>Helaas wordt de relatie niet helemaal gescaffold</p>
+                <p>Wat gebeurt er als Klas Required is? Probeer: voeg toe: 
+                    <i-code>
+                        public int KlasId { get; set; }
+                    </i-code>
+                    Een error bij Update-Database? Haal de student weer weg. 
+                </p>
+                <p>Nu een error bij het toevoegen van de student... De Klas moet geset worden. </p>
+            </section>
+            <section h3="One-to-many: dropdown">
+                <p>In de Students/Create</p>
+                <ul>
+                    <li>In de View:
+                        <i-code html size=small>
+                            &lt;select asp-for=&quot;KlasId&quot;
+                                    asp-items=&quot;@(new SelectList((IEnumerable&lt;Klas&gt;)ViewData[&quot;Klassen&quot;], &quot;Id&quot;, &quot;Naam&quot;))&quot;&gt;
+                                &lt;option&gt;Kies een klas&lt;/option&gt;
+                            &lt;/select&gt;
+                        </i-code>
+                    </li>
+                    <li>In de Action:
+                        <i-icode>[Bind("Id,Naam,KlasId")]</i-icode>
+                    </li>
+                </ul>
+                <p>Voeg ook een kolom toe in de Students/Index. </p>
+            </section>
+            <section h3="De foute manier">
+                <p>In de Klas/Details: </p>
+                <ul>
+                    <li>In de View:
+                        <i-code cshtml size=small> 	
+                            @foreach (Student s in (IEnumerable&lt;Student&gt;)ViewData[&quot;Studenten&quot;])
+                            {
+                                &lt;a asp-controller=&quot;Klas&quot; 
+                                    asp-action=&quot;VerwijderStudent&quot; 
+                                    asp-route-student=&quot;@s.Id&quot;&gt;
+                                    Verwijder @s.Naam&lt;/a&gt;
+                            }
+                         </i-code>
+                    </li>
+                    <li>Maak de action VerwijderStudent aan. </li>
+                    <li>Pas op! Dit is een link, dus wordt deze opnieuw uitgevoerd als de pagina wordt ververst. Gebruik liever PRG. </li>
+                    <li>Alternatieve oplossing: i.p.v. bij elke aanpassing een request, verwerk alleen de aanpassingen aan het eind. </li>
+                </ul>
+            </section>
+            <section h2="Toets bespreken">
+                Even samen door de toets heen lopen
+            </section>
+            <section h3="1a: margins, paddings en borders">
+                <p><a href="https://jsfiddle.net/axrbLjz0/">Live</a></p>
+                <p>Schets: </p>
+                <svg
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:cc="http://creativecommons.org/ns#"
+                xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                xmlns:svg="http://www.w3.org/2000/svg"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+                width="50%"
+                viewBox="0 0 91.671173 39.419987"
+                version="1.1"
+                id="svg8"
+                inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+                sodipodi:docname="1a.svg">
+                <defs
+                    id="defs2" />
+                <sodipodi:namedview
+                    id="base"
+                    pagecolor="#ffffff"
+                    bordercolor="#666666"
+                    borderopacity="1.0"
+                    inkscape:pageopacity="0.0"
+                    inkscape:pageshadow="2"
+                    inkscape:zoom="2.8"
+                    inkscape:cx="187.55097"
+                    inkscape:cy="61.759372"
+                    inkscape:document-units="mm"
+                    inkscape:current-layer="layer1"
+                    showgrid="false"
+                    fit-margin-top="0"
+                    fit-margin-left="0"
+                    fit-margin-right="0"
+                    fit-margin-bottom="0"
+                    inkscape:window-width="1522"
+                    inkscape:window-height="896"
+                    inkscape:window-x="543"
+                    inkscape:window-y="552"
+                    inkscape:window-maximized="0" />
+                <metadata
+                    id="metadata5">
+                    <rdf:RDF>
+                    <cc:Work
+                        rdf:about="">
+                        <dc:format>image/svg+xml</dc:format>
+                        <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                        <dc:title></dc:title>
+                    </cc:Work>
+                    </rdf:RDF>
+                </metadata>
+                <g
+                    inkscape:label="Layer 1"
+                    inkscape:groupmode="layer"
+                    id="layer1"
+                    transform="translate(-65.548988,-78.107391)">
+                    <rect
+                    style="fill:#f9cc9d;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.795, 0.795;stroke-dashoffset:0;stroke-opacity:1"
+                    id="rect869"
+                    width="45.703087"
+                    height="39.154987"
+                    x="65.681488"
+                    y="78.239891" />
+                    <rect
+                    style="fill:#fddc9a;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                    id="rect867"
+                    width="37.48455"
+                    height="28.196934"
+                    x="69.790756"
+                    y="83.718918" />
+                    <rect
+                    style="fill:#c2ce89;fill-opacity:1;stroke:#999999;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.53, 1.06;stroke-dashoffset:0;stroke-opacity:1"
+                    id="rect865"
+                    width="29.266012"
+                    height="17.038431"
+                    x="73.900024"
+                    y="89.298172" />
+                    <rect
+                    style="fill:#8bb4c0;fill-opacity:1;stroke:#999999;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                    id="rect863"
+                    width="21.515198"
+                    height="5.8799295"
+                    x="77.775436"
+                    y="94.877419" />
+                    <text
+                    xml:space="preserve"
+                    style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                    x="76.175987"
+                    y="92.895615"
+                    id="text4577"><tspan
+                        sodipodi:role="line"
+                        id="tspan4575"
+                        x="76.175987"
+                        y="92.895615"
+                        style="fill:#333333;stroke-width:0.26458332">padding</tspan></text>
+                    <text
+                    xml:space="preserve"
+                    style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                    x="72.248886"
+                    y="87.724632"
+                    id="text4581"><tspan
+                        sodipodi:role="line"
+                        id="tspan4579"
+                        x="72.248886"
+                        y="87.724632"
+                        style="fill:#333333;stroke-width:0.26458332">border</tspan></text>
+                    <text
+                    xml:space="preserve"
+                    style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                    x="66.969002"
+                    y="81.841713"
+                    id="text4585"><tspan
+                        sodipodi:role="line"
+                        id="tspan4583"
+                        x="66.969002"
+                        y="81.841713"
+                        style="fill:#333333;stroke-width:0.26458332">margin</tspan></text>
+                    <g
+                    id="eerste" frag=1
+                    inkscape:label="#g4740">
+                    <rect
+                        y="78.239891"
+                        x="111.38457"
+                        height="39.154987"
+                        width="45.703091"
+                        id="rect869-6"
+                        style="fill:#f9cc9d;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.79500001, 0.79500001;stroke-dashoffset:0;stroke-opacity:1" />
+                    <rect
+                        y="83.718918"
+                        x="115.49384"
+                        height="28.196934"
+                        width="37.48455"
+                        id="rect867-9"
+                        style="fill:#fddc9a;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                    <rect
+                        y="89.298172"
+                        x="119.60311"
+                        height="17.038433"
+                        width="29.266012"
+                        id="rect865-4"
+                        style="fill:#c2ce89;fill-opacity:1;stroke:#999999;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.53000001, 1.06000001;stroke-dashoffset:0;stroke-opacity:1" />
+                    <rect
+                        y="94.877419"
+                        x="123.47852"
+                        height="5.8799295"
+                        width="21.515198"
+                        id="rect863-7"
+                        style="fill:#8bb4c0;fill-opacity:1;stroke:#999999;stroke-width:0.26499999;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+                    <text
+                        id="text4577-2"
+                        y="92.895615"
+                        x="121.87907"
+                        style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="fill:#333333;stroke-width:0.26458332"
+                        y="92.895615"
+                        x="121.87907"
+                        id="tspan4575-8"
+                        sodipodi:role="line">padding</tspan></text>
+                    <text
+                        id="text4581-5"
+                        y="87.724632"
+                        x="117.95197"
+                        style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="fill:#333333;stroke-width:0.26458332"
+                        y="87.724632"
+                        x="117.95197"
+                        id="tspan4579-0"
+                        sodipodi:role="line">border</tspan></text>
+                    <text
+                        id="text4585-1"
+                        y="81.841713"
+                        x="112.67208"
+                        style="font-style:normal;font-weight:normal;font-size:2.78766942px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="fill:#333333;stroke-width:0.26458332"
+                        y="81.841713"
+                        x="112.67208"
+                        id="tspan4583-9"
+                        sodipodi:role="line">margin</tspan></text>
+                    </g>
+                    <g
+                    id="tweede" frag=2
+                    inkscape:label="#g4754">
+                    <text
+                        id="text4589-5"
+                        y="104.7991"
+                        x="133.50133"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="104.7991"
+                        x="133.50133"
+                        id="tspan4587-4"
+                        sodipodi:role="line">8</tspan></text>
+                    <text
+                        id="text4593-8"
+                        y="115.8549"
+                        x="132.41957"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="115.8549"
+                        x="132.41957"
+                        id="tspan4591-4"
+                        sodipodi:role="line">16</tspan></text>
+                    <text
+                        id="text4597-2"
+                        y="110.37424"
+                        x="132.29469"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="110.37424"
+                        x="132.29469"
+                        id="tspan4595-3"
+                        sodipodi:role="line">32</tspan></text>
+                    <text
+                        id="text4589-5-7"
+                        y="104.7131"
+                        x="87.18103"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="104.7131"
+                        x="87.18103"
+                        id="tspan4587-4-7"
+                        sodipodi:role="line">1</tspan></text>
+                    <text
+                        id="text4593-8-6"
+                        y="115.76891"
+                        x="87.259407"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="115.76891"
+                        x="87.259407"
+                        id="tspan4591-4-4"
+                        sodipodi:role="line">2</tspan></text>
+                    <text
+                        id="text4597-2-8"
+                        y="110.28825"
+                        x="87.224953"
+                        style="font-style:normal;font-weight:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                        xml:space="preserve"><tspan
+                        style="stroke-width:0.26458332"
+                        y="110.28825"
+                        x="87.224953"
+                        id="tspan4595-3-4"
+                        sodipodi:role="line">4</tspan></text>
+                    </g>
+                </g>
+                </svg>
+                <p frag=3>De afstand tussen de doosjes is 2px + 16px = 18px</p>
+                <p frag=4>De afstand tussen de tekst is alles bij elkaar = 63px</p>
+            </section>
+            <section h3="1b: border-box">
+                <p><a href="https://jsfiddle.net/axrbLjz0/1/">Live</a></p>
+                <p>Het box-sizing attribuut heeft alleen effect als de width is opgegeven. </p>
+            </section>
+            <section h3="1c: border-box">
+                <p><a href="https://jsfiddle.net/axrbLjz0/2/">Live</a></p>
+                <p>Schets: </p>
+                <img src="img/1c.svg" style="width:50%">
+                <p frag=3>De totale breedte, min de inhoud, is 2 + 128 + 2 + 2 * (8 + 32 + 16)=244</p>
+            </section>
+            <section h3="1d: Header">
+                <p>Lesdoel: <em>je kunt begijpt wat semantische elementen zijn en kunt HTML elementen in content categorieën indelen. </em></p>
+                <p>De header tag is er niet om stijl aan te geven, maar is er voor semantiek. Screenreaders en bots 'begrijpen' dat dit de header is. Het ziet er niet anders uit. </p>
+            </section>
+            <section h3="1e: @media voorwaarden">
+                <p>Lesdoel: <em>je kent de CSS at-regel @media en begrijp je hoe je daarvan gebruik kunt maken om de website op verschillende devices aantrekkelijk te blijven tonen.</em></p>
+                <p>Lesdoel: <em>je kunt de breedte van een element beïnvloeden door in CSS gebruik te maken van relatieve width of max-width.</em></p>
+                <p>De volgende code</p>
+                <i-code css> 	
+                    @media screen and (min-width: 500px) { body { width: 500px; } }
+                    @media screen and (max-width: 500px) { body { width: 100%; } }
+                </i-code>
+                <p>Is hetzelfde als</p>
+                <i-code css>
+                    body { width: 100%; max-width: 500px; }
+                </i-code>
+            </section>
+            <section h3="1f: Bootstrap cols">
+                <p><a href="https://jsfiddle.net/n2wvj3az/">Live</a></p>
+                <p>Lesdoel: <em>Je weet wat responsiveness van een website is en je kunt responsiveness met een grid-framework implementeren.</em></p>
+                <i-code html> 	
+                    &lt;div class=&quot;container&quot;&gt;
+                        &lt;div class=&quot;row&quot;&gt;
+                          &lt;div class=&quot;col-md&quot;&gt;
+                            &lt;img style=&quot;width:100%&quot; src=&quot;...&quot;/&gt;
+                          &lt;/div&gt;
+                          &lt;div class=&quot;col-md&quot;&gt;
+                            &lt;img style=&quot;width:100%&quot; src=&quot;...&quot;/&gt;
+                          &lt;/div&gt;
+                          &lt;div class=&quot;col-md&quot;&gt;
+                            &lt;img style=&quot;width:100%&quot; src=&quot;...&quot;/&gt;
+                          &lt;/div&gt;
+                        &lt;/div&gt;  
+                    &lt;/div&gt;
+                </i-code>
+            </section>
+            <section h3="1g: SCSS">
+                <p>Lesdoel: <em>Je begrijpt waarom SCSS bestaat en wat de relatie is met CSS.</em></p>
+                <p>Performance / compatibilitiet</p>
+            </section>
+            <section h3="2a: property overriden">
+                <p>Property overriden kan. Voorbeeld van toepassing: de setter van achternaam (uit Persoon) van een GetrouwdPersoon verandert ook de achternaam van de partner. </p>
+            </section>
+            <section h3="2b: OO">
+                <ol>
+                    <li>Fout: een interface kan je niet instantieren</li>
+                    <li>Fout: een <i-icode>List&lt;Base&gt;</i-icode> is niet een speciaal soort <i-icode>List&lt;Derived&gt;</i-icode></li>
+                    <li>Fout: een <i-icode>List&lt;Derived&gt;</i-icode> is niet een speciaal soort <i-icode>List&lt;Base&gt;</i-icode></li>
+                    <li>Goed</li>
+                </ol>
+            </section>
+            <section h3="2c: LINQ">
+                Runtimefout. 
+            </section>
+            <section h3="2d: LINQ">
+                <i-code cs>var p = personen.LastOrDefault (p =&gt; p.Naam == &quot;Jan&quot; &amp;&amp; p.Leeftijd &lt; 18)</i-code>
+            </section>
+            <section h3="2e: Single">
+                <p>Error als er niet precies 1 is. </p>
+            </section>
+            <section h3="2f: Anoniem type">
+                <i-code cs>persoon =&gt; new { NaamLengte = persoon.Naam.Length }</i-code>
+            </section>
+            <section h3="2g: Deferred execution">
+                <p>Er zijn geen compiletime fouten. 
+                    ToList() uitvoeren voordat Take wordt uitgevoerd is traag, omdat Select en take lazy zijn, en tolist breekt deze lazyness. 
+                    Alleen 1 is een lijst, de rest is een IEnumerable. </p>
+            </section>
+            <section h3="2h: LINQ">
+                Alternatieven zijn mogelijk!
+                <i-code cs>Select(godsdienst =&gt; godsdienst.AantalGelovigen).Sum()</i-code>
+            </section>
+            <section h3="2i: te moeilijk">
+                <i-code cs>
+                    Select(godsdienst =&gt; godsdienst.Gelovigen.Select(
+                        gelovige =&gt; godsdienst.Equals(godsdiensten.Where(
+                            godsdienst2 =&gt; godsdienst2.Gelovigen.Contains(gelovige)).First())).Sum()).Sum()
+                </i-code>
+            </section>
+            <section h3="3a: unit testen">
+                <p>Met Theory kun je één testmethode meerdere keren uitvoeren met verschillende inputwaardes.</p>
+            </section>
+            <section h3="3a: unit testen">
+                <i-code cs>
+                    [Fact]
+                    public void Test1()
+                    {
+                        Calculator c = new Calculator();
+                        Xunit.Assert.Equal(3, c.Add(1, 2));
+                    }
+                </i-code>
+            </section>
+            <section h3="4a: formulier">
+                <p>de URL <a href="">https://nu.nl/login?password=...</a>, get moet post worden</p>
+            </section>
+            <section h3="4b: routing">
+                <p><a href="">http://www.mijnwinkel.nl/WinkelMandje/Verwijder/123</a></p>
+                <p>of</p>
+                <p><a href="">http://www.mijnwinkel.nl/WinkelMandje/Verwijder?id=123</a></p>
+            </section>
+            <section h3="4c: PRG">
+                <p>Tekening: </p>
+            </section>
+            <section h3="4d: Communicatie Controller-View">
+                <i-code cshtml>@model IEnumarable&lt;Student&gt;</i-code>
+            </section>
+            <section h3="4e: Razor">
+                Zet <i-icode cshtml>@if (Model.Count > 0) { … }</i-icode> om de ul heen. 
+            </section>
+            <section h3="4f: Viewmodels">
+                <ul>
+                    <li>maak een nieuw (view)model met de lijst en het aantal prive meldingen, of</li>
+                    <li>stuur de hele lijst met meldingen naar de view en bereken daar het aantal prive meldingen. </li>
+                </ul>
+            </section>
+            <section h2="Opdracht">
+                <ul>
+                    <li>Maak een Student model aan met de volgende properties: 
+                        <ul>
+                            <li>Id</li>
+                            <li>Naam</li>
+                            <li>Lengte</li>
+                        </ul>
+                        Maak een Cursus model aan met de volgende properties: 
+                        <ul>
+                            <li>Id</li>
+                            <li>Naam</li>
+                        </ul>
+                    </li>
+                    <li>Maak nu een <strong>veel op veel</strong> (<em>in de les een op veel</em>) relatie aan tussen Student en Cursus</li>
+                    <li>Scaffold de controller en views</li>
+                    <li>Voor de student Index: 
+                        <ul>
+                            <li>Maak een zoekfunctie</li>
+                            <li>Implementeer paginering</li>
+                            <li>Maak het mogelijk om <strong>te sorteren op Id, of Naam of Lengte</strong> (<em>in de les alleen op naam</em>). (uitdaging: bij gelijk gesorteerd, sorteer op een andere kolom)</li>
+                            <li>Laat zien per student welke cursussen hij/zij volgt. </li>    
+                        </ul>
+                    </li>
+                    <li>
+                        Zorg dat er ook front-end is om studenten aan cursussen toe te voegen en te verwijderen. 
+                    </li>
+                </ul>
+            </section>
+        </i-slides>
+        <script src="code/scripts.js"></script>
+</body>
+
+</html>
